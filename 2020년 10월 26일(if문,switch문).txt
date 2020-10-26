@@ -1,0 +1,275 @@
+2020년 10월 26일
+
+
+---------------------------------------------------------------------------
+
+
+11. 제어문
+ - 프로그램 수행의 흐름을 결정(제어)하는 데 사용되는 문장
+ - 프로그램은 항상 위에서 부터 아래로 실행되는데 조건에 따라 원하는 순서로 실행되도록 흐름을 조정 함
+ - 제어문의 종류
+	조건문 : if문, switch문
+	반복문 : while문, do-while문, for문
+	분기문 : continue , break , return
+
+
+
+- 조건문
+	조건식을 제시하고 조건식의 결과에 따라 다음 코드의 수행 여부를 결정하는 문장
+	if문, switch문(선택문)
+
+
+ - if문
+	조건이 참일 때 다음에 오는 하나의 명령을 실행
+	조건이 참일 때 실행 할 내용이 한 줄 이상일 경우 { } 로 영역지정  
+	if문 사용법1
+		if(조건식)
+			명령;
+	if문 사용법2
+		if(조건식){
+			명령1;
+			명령2;
+		}
+	if문 예시1
+		Scanner scan = new Scanner(System.in);
+		int num = scan.nextInt();
+		if(num > 0)
+			System.out.println("양수입니다.");
+		System.out.println("프로그램 종료");
+	if문 예시2
+		Scanner scan = new Scanner(System.in);
+		int num = scan.nextInt();
+		if(num > 0) {
+			System.out.println("양수입니다.");
+			System.out.println("조건이 참입니다.");
+		}
+		System.out.println("프로그램 종료");
+ - if-else문
+	if 문의 조건식의 결과가 true 일 경우와 false일 경우 수행할 문장을 각각 지정
+	조건이 참일 때 if 다음 명령을 실행하고 거짓일 때 else 다음 명령을 실행
+	if-else 문 사용법
+		if(조건식) {
+			명령1;
+		} else {
+			명령2;
+		}
+	if-else문 예시
+		Scanner scan = new Scanner(System.in);
+		int num = scan.nextInt();
+		if(num > 0) {
+			System.out.println("양수입니다.");
+			System.out.println("조건이 참입니다.");
+		}
+		else {
+			System.out.println("양수가 아닙니다.");
+		}
+		System.out.println("프로그램 종료");
+ - if-else if-else 문
+	조건을 2개 이상 주고 각 조건에 따라 다른 내용을 실행
+	if-else if-else 문 사용법
+		if(조건식1) {
+			명령1;
+		} else if(조건식2){
+			명령2;
+		} else {
+			명령3;
+		}
+	if-else if-else 문 예시1
+		Scanner scan = new Scanner(System.in);
+		int num = scan.nextInt();
+		if(num > 0) {
+			System.out.println(“0보다 큰 수");
+		} else if (num < 0){
+			System.out.println(“0보다 작은 수");
+		} else {
+			 System.out.println(“0과 같은 수");
+		}
+	if-else if-else 문 예시2 - 조건 순서에 따른 문제점
+		Scanner scan = new Scanner(System.in);
+		int num = scan.nextInt();
+		if(num % 2 == 0) {
+			System.out.println("짝수입니다.");		
+		}else if(num % 2 == 1) {
+			System.out.println("홀수입니다.");
+		}else {
+			System.out.println("0입니다.");
+		}
+		-> 0을 입력 할 경우 짝수입니다 출력됨
+		-> 방법 1 : 조건의 순서 변경
+		Scanner scan = new Scanner(System.in);
+		int num = scan.nextInt();
+		if(num == 0) {
+			System.out.println("0입니다.");				
+		}else if(num % 2 == 1) {
+			System.out.println("홀수입니다.");
+		}else {
+			System.out.println("짝수입니다.");
+		}
+		-> 방법 2 : 조건문 안에 또다른 조건문 사용(중첩 if문)
+		if(num % 2 == 0) {
+			if(num == 0) {
+				System.out.println("0입니다.");
+			}else {
+				System.out.println("짝수입니다.");
+			}
+		}else {
+			System.out.println("홀수입니다.");
+		}
+ - 중첩 if문
+	if문 안에 또다른 if문 사용
+	제어문 블록 내에는 다른 제어문을 중첩 사용 가능
+	중첩 if문 사용법
+		if(조건식1) {
+			명령1;
+			if(조건식2){
+				명령2;
+			}else {
+				명령3;
+			}
+		} else {
+			명령4;
+		}
+	중첩 if문 예시
+		Scanner scan = new Scanner(System.in);
+		System.out.print("월 입력 : ");
+		int month = scan.nextInt();
+		System.out.print("온도 입력 : ");
+		int temperature = scan.nextInt();
+		String season="";
+		if(month == 1 || month == 2 || month == 12) {
+			season = "겨울";
+			if(temperature <= -15) {
+				season += " 한파 경보";
+			}else if(temperature <= -12) {
+				season += " 한파 주의보";
+			}
+		} else if(month >= 3 && month <= 5) {
+			season = "봄";
+		} else if(month >= 6 && month <= 8) {
+			season = "여름";
+			if(temperature >= 35) {
+				season += " 폭염 경보";
+			}else if(temperature >= 33) {
+				season += "폭염 주의보";
+			}
+		} else if(month >= 9 && month <= 11) {
+			season = "가을";
+		} else {
+			season = "해당하는 계절이 없습니다.";
+		}
+		System.out.println(season);
+	}
+
+---------------------------------------------------------------------------
+
+
+- switch문
+	조건 값에 해당하는 경우를 찾아 선택하여 실행 하는 것
+	상수 값(정수 또는 문자, 문자열)의 결과를 가지는 조건을 입력 받아 동일한 case 조건 이후 내용부터 모두 실행
+
+	조건식의 결과 값과 일치하는 case문으로 이동
+	default문은 일치하는 case문이 없을 때 수행(= else ) 
+	switch문 사용법
+		switch(조건식) {
+		case 조건값1 :
+			명령1;
+		case 조건값2 : 
+			명령2;
+		case 조건값3 :
+			명령3;
+		default :
+		}
+	switch문 예시 1 : 기본 동작 방식
+		Scanner scan = new Scanner(System.in);
+		System.out.print("정수를 입력하세요 : ");
+		int select = scan.nextInt();
+		switch(select)
+		{
+		case 1 :	System.out.println("1 입력");
+		case 2 :	System.out.println("2 입력");
+		case 3 :	System.out.println("3 입력");
+		case 4 :	System.out.println("4 입력");
+		default :	System.out.println("기타입력");
+		}
+	switch문 예시 2 : 조건에 일치하는 Case 만 실행
+		Scanner scan = new Scanner(System.in);
+		System.out.print("정수를 입력하세요 : ");
+		int select = scan.nextInt();
+		switch(select)
+		{
+		case 1 :	System.out.println("1 입력");
+			break;
+		case 2 :	System.out.println("2 입력");
+			break;
+		case 3 :	System.out.println("3 입력");
+			break;
+		case 4 :	System.out.println("4 입력");
+			break;
+		default :	System.out.println("기타입력");
+		}
+	switch문 예시 3 : 조건에 일치하는 Case의 실행 명령이 여러 줄 인 경우
+		Scanner scan = new Scanner(System.in);
+		System.out.print("정수를 입력하세요 : ");
+		int select = scan.nextInt();
+		switch(select)
+		{
+		case 1 :	System.out.println("1 입력");
+			System.out.println("1 입력2");
+			System.out.println("1 입력3");
+			break;
+		case 2 :	System.out.println("2 입력");
+			break;
+		case 3 :	System.out.println("3 입력");
+			break;
+		case 4 :	System.out.println("4 입력");
+			break;
+		default :	System.out.println("기타입력");
+		}
+	switch문 예시 4 : 조건식 활용
+		Scanner scan = new Scanner(System.in);
+		System.out.print("정수를 입력하세요 : ");
+		int select = scan.nextInt();
+		switch(select/10)
+		{
+		case 0 :	System.out.println("0~9입력");
+			break;
+		case 1 :	System.out.println("10~19 입력");
+			break;
+		case 2 :	System.out.println("20~29 입력");
+			break;
+		case 3 :	System.out.println("30~39 입력");
+			break;
+		case 4 :	System.out.println("40~49 입력");
+			break;
+		default :	System.out.println("기타입력");
+		}
+	switch문 예시 5
+		Scanner scan = new Scanner(System.in);
+		System.out.print("정수를 입력하세요 : ");
+		int select = scan.nextInt();
+		switch(select)
+		{
+		case 0 : 
+		case 5 :	System.out.println("1,5 입력");
+			break;
+		case 3 :	
+		case 7 :	
+		case 9 :	System.out.println("3,7,9 입력");
+			break;
+		default :	System.out.println("기타입력");
+		}
+	switch문 예시 6
+		Scanner scan = new Scanner(System.in);
+		System.out.print("이름을 입력하세요 : ");
+		String name = scan.next();
+		switch(name)
+		{
+		case "이은지" : 
+		case "김우영" :	System.out.println("1팀입니다.");
+			break;
+		case "최민재" :	
+		case "김지민" :	
+		case "박주희" :	System.out.println("2팀입니다.");
+			break;
+		default :	System.out.println("기타입력");
+		}
