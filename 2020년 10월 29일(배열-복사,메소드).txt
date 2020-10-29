@@ -1,0 +1,348 @@
+2020년 10월 29일
+
+어제 배운 것
+
+- 배열
+같은 자료형의 공간을 여러개 묶어서 사용하는 것
+이름 하나만 붙인다.
+각각의 공간에 접근하기 위해서는 인덱스(순서번호)를 사용한다.
+
+----------------------------------------------------------------------------
+
+14. 정적할당 vs 동적할당
+
+- 정적할당 : 프로그램을 만드는 시점에 이미 할당할 공간의 크기가 결정되어 있는 경우
+	Stack영역에 만들어 지는 것은 모두 정적할당
+	기본 자료형
+	예시
+		int num;
+		char ch;
+		int[] arr; = 4byte의 주소를 저장하는 공간 하나 만들어짐
+
+- 동적할당: 먼저 만들 때는 공간이 얼만큼 필요한지 모름, 프로그램 동작하는 동안에 공간을 만들어 줄것임
+	프로그램을 실행하는 도중에 할당할 공간의 크기가 결정되는 경우
+	Heap영역에 따로 빼논다
+	new = 동적할당을 하기 위한 연산자
+	new 연산자 사용
+	예시1
+		arr = new int[5];
+	예시2
+		int count = scan.nextInt();
+		arr = new int[count];
+
+
+실습
+		Scanner scan = new Scanner(System.in);
+		// 배열 선언
+		String[] studentName;	// 메모리의 주소를 저장하는 참조변수 생성(Stack 영역)
+		
+		// 배열 할당 - 데이터 저장공간 생성
+//		studentName = new String[10];	
+//			// 실제 데이터를 저장하는 변수 공간 생성 후 주소를 참조변수에 저장(Heap 영역)
+		// 학생 인원수 입력 받기
+		System.out.print("학생이 몇명입니까? ");
+		int count = scan.nextInt();
+		// 입력 받은 인원 수 만큼 공간 할당
+		studentName = new String[count];
+		// 이름 입력 받기
+		for(int i=0; i<studentName.length; i++) {
+			System.out.print(i+1+"번째 학생 이름 : ");
+			studentName[i] = scan.next();
+		}
+		// 학생 목록 출력
+		System.out.println("## 학생 목록 ##");
+		for(int i=0; i<studentName.length; i++) {
+			System.out.println(studentName[i]);
+		}
+
+
+int[] arr = new int[5];
+정적할당 / 동적할당
+
+
+----------------------------------------------------------------------------
+
+15. 배열 복사
+
+ - 얕은 복사
+	객체의 주소 값만 가져와 참조형 변수에 저장하고 하나의 객체를 두 변수가 참조하는 것
+	예시
+		// 얕은 복사
+		int[] arr1 = new int[] {10,20,30,40,50};
+		int[] arr2 = arr1;
+		
+		arr1[0] = 100;
+		
+		System.out.println("arr1 주소 : "+arr1);
+		for(int i=0; i<arr1.length; i++) {
+			System.out.print(arr1[i]+" ");
+		}
+		System.out.println();
+		System.out.println("arr2 주소 : "+arr2);
+		for(int i=0; i<arr2.length; i++) {
+			System.out.print(arr2[i]+" ");
+		}
+		
+ - 깊은 복사
+	새로운 배열 객체를 생성하여 기존 배열의 데이터를 복사하는 것
+	예시
+		int[] arr1 = new int[] {10,20,30,40,50};
+		int[] arr2 = new int[5];
+		
+		// 방법 1
+		//for(int i=0; i<arr1.length; i++) {	// 전체 데이터 복사
+		//	arr2[i] = arr1[i];
+		//}
+		for(int i=2; i<arr1.length; i++) {	// 특정 데이터 복사
+		arr2[i-2] = arr1[i];
+		}
+		// 방법 2
+		//System.arraycopy(원본배열, 원본 시작위치, 목적지 배열, 목적지 시작위치, 복사할 길이);
+		//System.arraycopy(arr1, 0, arr2, 0, arr1.length);	// 전체 데이터 복사
+		System.arraycopy(arr1, 3, arr2, 0, arr1.length-3);	// 특정 데이터 복사
+		// 방법 3
+		// Arrays.copyOf(원본배열, 복사할 길이);
+		//arr2 = Arrays.copyOf(arr1, arr1.length);	// 전체 데이터 복사
+		//arr2 = Arrays.copyOf(arr1, 3);	// 특정 데이터 복사
+		// Arrays.copyOfRange(원본배열, 시작위치, 끝위치+1);
+		arr2 = Arrays.copyOfRange(arr1, 3, arr1.length);	// 특정 데이터 복사
+		// 방법 4
+		arr2 = arr1.clone();// 전체 데이터 복사
+		
+		
+		//arr1[0] = 100;
+		
+		System.out.println("arr1 주소 : "+arr1);
+		for(int i=0; i<arr1.length; i++) {
+			System.out.print(arr1[i]+" ");
+		}
+		System.out.println();
+		System.out.println("arr2 주소 : "+arr2);
+		for(int i=0; i<arr2.length; i++) {
+			System.out.print(arr2[i]+" ");
+
+
+16. 다차원 배열
+- 배열을 두 개 이상 묶어서 사용하는 것
+- 2차원 배열
+	같은 자료형의 변수들을 묶어서 사용하는 일차원배열을 여러개 묶어서 사용하는 것
+	일차원 배열 안의 각 변수공간을 구분하기 위한 인덱스(순서번호)와 일차원 배열을 구분하기 위한 인덱스(순서번호)가 각각 있어야 함
+	=> 인덱스(순서번호)두 개 사용
+	
+	배열 선언
+		자료형[][] 배열명;
+		자료형 배열명[][];
+		자료형[] 배열명[];
+	
+	배열 할당
+		배열명 = new 자료형[일차원배열 갯수][변수 갯수];
+	
+	예시
+		int[][] arr = new int[3][4];
+		// 정수형 일차원 변수 4개를 묶은 일차원배열을 3개 생성
+
+	인덱스를 이용한 초기화
+		int[][] arr = new int[3][4];
+		arr[0][0] = 10;
+		arr[0][1] = 20;
+	반복문을 이용한 초기화
+		인덱스가 두 개 이기 때문에 반복문 2개 중첩해서 사용
+		for(int i=0; i<arr.length; i++) {
+			for(int j=0 ; j<arr[i].length ; j++){
+				arr[i][j] = 입력값;
+			}
+		}
+	
+	선언 시 초기화
+		int[][] arr = {{10,20,30,40},{10,20,30,40}};
+		int[][] arr = new int[][] {{10,20,30,40},{10,20,30,40}};
+
+
+-----------------------------------------------------------------------------
+17. 메소드(method)
+- 타 언어에서는 함수(function)라고 부름
+- 하나의 기능을 묶어서 만들어놓은 도구
+- 자주사용하는 명령들을 미리 묶어서 만들어놓고 편하게 불러서 사용 가능
+- 수정, 관리가 용이함
+
+
+휴대폰 = 하나의 큰 프로그램
+다양한 기능이 있음 (문자, 전화, 등등)
+전화 버튼을 누름 - 번호를 누르는 기능, 전화번호 누르는 기능, 끊는 기능 = 전화 기능에도 여러가지 기능이 있음
+전화 라는 것을 하나의 클래스라고 보고 번호를 누르고 끊는 등등의 세부적인 기능을 메소드라고 볼 수 있다.
+
+객체지향 = 여러 기능을 묶어주는 하나의 큰 틀
+
+데이터 저장 = 변수
+기능을 묶는 것 = 메소드
+변수와 메소드를 묶은 것 = 클래스
+
+- 메소드 형태
+	ex. public  	static
+	[접근제어 지시자][예약어] 반환자료형 메소드명(매개변수){
+		메소드 내용;
+	}
+	
+ 
+
+	반환자료형(리턴 타입) : 결과값에 대한 정의 (출력하고 끝났다)
+	예) 전자계산기 객체에서 전원을 켜는 powerOn () 메소드와 두 수를 나누는 기능인 divde() 메소드가 있다고 가정
+	divdide() 메소드는 나눗셈의 결과를 리턴해야 하지만 powerOn()메소드는 전원만 켜면 그만이다.
+	따라서 powerOn() 메소드는 리턴값이 없고, divide() 메소드는 리턴값이 있다.
+
+		자료형
+		결과값이 없는 경우 : void (자료형이 없다 라는 뜻의 자료형)
+		결과값이 있는 경우 : 결과값에 대한 자료형,(메소드를 실행하고 끝나고 나서 최종적으로 결과값을 주고 죽는 것)
+			return 결과값;
+
+			정수형 형태의 결과 값이 나올 거다 -> int
+			실수 형태의 결과 값이 나올거다 -> double 
+			이렇게 적어주면 됨
+	ex)
+	void powerOn() { ... }
+	double divide(int x, int y) { ... }
+
+
+	메소드명: 메소드에 대한 이름
+		변수의 명명규칙과 동일하게 사용
+		주로 동사로 사용 (ex. run change walk) 
+	
+
+	매개변수: 입력값에 대한 정의
+		입력값 있어야 동작하는 애가 있고 없어도 동작하는 애 (예- powerOn() 그냥 전원키기)가 있다.
+		필요 없으면 비워두면 됨
+
+		입력값이 필요하면 입력값에 대해 정의를 해줘야 한다.
+		어떤 형태의 데이터를 몇개 입력받을지
+		입력받은 데이터를 저장해서 사용할 이름
+		내 메소드가 호출이 될때 나한테 들어오는 값을 받기 위해 기다리고 있는 변수
+		(자료형 변수명, 자료형 변수명,..) -> 입력받을 개수만큼 만들어준다.
+		void func( int num, float num2, char ch);
+		-> 호출 할 때 (10, 3.5, 'A'); 이런식으로 자료형에 맞게 넣어줘야 한다.
+ 		void func (int num, int num2, char ch);
+		이때 (int num, num2, char ch) 라고 적으면 안된다.
+		자료형이 앞과 같더라도 다 각각 자료형 써줘야 한다.
+
+
+	
+	모든 도구들은 사용했으면 그것에 대한 결과가 나와야 함, 결과가 형태에 따라 다름
+	메소드 들을 다양한 곳에서 사용하기 위해서.
+	
+
+
+- 메소드 호출
+	메소드명(인자값);
+
+	메소드명: 만들어져 있는 메소드 이름을 정확하게 불러야 한다.
+	인자값: 메소드가 입력받기 원하는 값을 입력해줌
+
+	메소드는 만든다고만해서 실행되지 않는다.
+	호출을 해야 사용된다.
+	메소드는 메소드 안에서 만들 수 없다.
+
+	예시1 : 
+		public static void func1() {
+			System.out.println("func 메서드");
+			int num = 10;
+			int sum = 0;
+			for(int i=0; i<=num; i++){
+				sum += i;
+			}
+			System.out.println(sum);		
+		}
+		public static void main(String[] args) {
+			System.out.println("main 메서드");
+			func1();
+		}
+
+
+	예시2 : 입력 값을 외부에서 전달
+		public static void func1(int num) {
+			System.out.println("func 메서드");
+			int sum = 0;
+			for(int i=0; i<=num; i++){
+				sum += i;
+			}
+			System.out.println(sum);		
+		}
+		public static void main(String[] args) {
+			System.out.println("main 메서드");
+			func1(10);
+		}
+
+	예시3 : 출력값을 외부로 전달
+		public static int func1(int num) {
+			System.out.println("func 메서드");
+			int sum = 0;
+			for(int i=0; i<=num; i++){
+				sum += i;
+			}
+			return sum;		
+		}
+		public static void main(String[] args) {
+			System.out.println("main 메서드");
+			int sum = func1(10);
+			System.out.println(sum);
+		}
+
+
+
+
+기능은 같지만
+기능에서 사용하는 값을 계속 바꾸고 싶어
+int num 의 값을 계속 바꾸고 싶어
+
+num 값이 고정적
+(전화번호를 안눌러도 바로 전화가 걸리는 전화기랑 같다.)
+	public static void func1() {
+		System.out.println("func1 메서드");
+		int num = 10;
+		int sum = 0;
+		for(int i=0; i<=num ; i++) {
+			sum += i;
+		} 
+		System.out.println(sum);
+		}
+
+num 값을 호출하는 사람이 값을 지정하도록 -> 이때 사용하는 것이 매개변수
+(전화번호를 눌러야 전화가 간다.)
+
+	public static void func1(int num) {
+		System.out.println("func1 메서드");
+
+		int sum = 0;
+		for(int i=0; i<=num ; i++) {
+			sum += i;
+		} 
+		System.out.println(sum);
+	}
+
+
+
+
+
+
+배열을 메소드로 만들 때
+
+	public static int[] func1(int num) {
+		System.out.println("func1 메서드");
+
+		int[] arr = new int[num];
+		for(int i=0; i<arr.length ; i++){
+			arr[i] = i*10 ;
+		} 
+		return arr; 
+	}
+
+	public static void main(String[] args) {
+		
+		int [] sum;
+		System.out.println("메인메서드");
+		sum = func1(10);
+		System.out.println("메인에서 받아온 arr 주소: "+sum);
+		for(int i=0; i<sum.length; i++) {
+			System.out.println(sum[i]);
+		}
+
+
+
