@@ -1,0 +1,161 @@
+// 부모 클래스
+public class Animal {
+	// 필드부
+	private String eye;
+	private String nose;
+	private String mouth;
+	
+	// 생성자부
+	public Animal () {
+		System.out.println("Animal 객체 생성");
+	}
+	// 메서드부
+	public void eat() {
+		System.out.println("먹다");	
+	}
+	public void speak() {
+		System.out.println("울다");
+	}
+	public void walk() {
+		System.out.println("걷다");
+	}
+	
+}
+
+
+// Animal 클래스를 상속받은 Cat 클래스
+
+public class Cat extends Animal{
+	// 필드부
+	// 생성자부
+	public Cat() {
+		System.out.println("Cat 객체 생성");
+	}
+	// 메서드부
+	public void grumming() {
+		System.out.println("털손질");
+	}
+	
+	public void speak() {
+		System.out.println("야옹");
+	}
+}
+
+
+// Animal 클래스를 상속받은 Dog 클래스
+
+public class Dog extends Animal {
+	// 필드부
+	// 생성자부
+	public Dog() {
+		System.out.println("Dog 객체 생성");
+	}
+	// 메서드부
+	public void await() {
+		System.out.println("기다리다");
+	}
+	public void protect() {
+		System.out.println("지키다");
+	}
+	
+	public void speak() {
+		System.out.println("멍멍");
+	}
+
+}
+
+
+
+// Animal 클래스를 상속받은 Rabbit 클래스
+
+public class Rabbit extends Animal{
+	// 필드부
+	private String ear;
+	// 생성자부
+	public Rabbit() {
+		System.out.println("Rabbit 객체 생성");
+	}
+	// 메서드부
+	public void jump(){
+		System.out.println("점프하다");
+	}
+
+	public void speak() {
+		System.out.println("콧소리");
+	}
+}
+
+
+
+
+
+// 실행 클래스
+
+
+import java.util.Scanner;
+public class Run {
+
+	public static void main(String[] args) {
+		Scanner scan = new Scanner(System.in);
+		Animal a ;
+		System.out.println("==== 동물원 ====");
+		System.out.println("1. 고양이");
+		System.out.println("2. 강아지");
+		System.out.println("3. 토끼");
+		System.out.println("4. 나가기");
+		System.out.print("어떤 동물을 보고 싶으신가요?");
+		int select = scan.nextInt();
+		switch(select) {
+		case 1:
+			a = new Cat();
+			((Cat)a).grumming();
+			break;
+		case 2:
+			a = new Dog();
+			((Dog)a).protect();
+			break;
+		case 3:
+			a = new Rabbit();
+			((Rabbit)a).jump();
+			break;
+		case 4:
+			return;
+		default:
+				System.out.println("잘못 선택하셨습니다.");
+				a = new Animal();
+		}
+		a.walk();
+		a.eat();
+		a.speak();
+		
+		
+//		Animal a = new Animal();
+//		a.eat();
+//		a.speak();
+//		a.walk();
+//		Cat c = new Cat();
+//		c.grumming();
+//		c.eat();
+//		c.speak();
+//		c.walk();
+//		
+//		Animal ac ; // Animal 형의 참조변수에 자식 클래스 객체 담기
+//		ac = new Cat();
+//		ac.eat();
+//		ac.speak();
+//		ac.walk();
+//		
+//		ac = new Dog();
+//		ac.eat();
+//		ac.speak();
+//		ac.walk();
+//		
+//		ac = new Rabbit();
+//		ac.eat();
+//		ac.speak();
+//		ac.walk();
+//		// 어떤 객체를 담느냐에 따라 실행되는 결과가 달라진다.
+		
+	}
+
+}
