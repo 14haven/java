@@ -1,9 +1,9 @@
 package com.kh.project.model;
 
-// ºÎ¸ğÅ¬·¡½º
+// ë¶€ëª¨í´ë˜ìŠ¤
 public class InterfaceClassExam01 {
 	public void exam01Method01() {
-		System.out.println("ºÎ¸ğÅ¬·¡½º");
+		System.out.println("ë¶€ëª¨í´ë˜ìŠ¤");
 	}
 	
 }
