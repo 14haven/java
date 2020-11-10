@@ -1,0 +1,332 @@
+2020년 11월 10일
+
+
+추상클래스와 인터페이스 복습
+
+추상 클래스
+부모한테 자식한테도 이런거 있을거예요 알려주는 것 -> 추상메소드
+추상메소드는 몸체가 없기 때문에 미완성 메소드
+미완성 메소드가 들어간 클래스에서는 객체를 생성 할 수 없다.
+추상메소드가 들어간 추상클래스
+굳이 추상메소드가 안들어가더라도 이 클래스는 부모 역할만 해야할것같아(자식들의 참조용으로만 사용 할 것 같아)
+-> 추상클래스로 만들 수 있음
+
+인터페이스
+추상 메소드로만 이루어져있음
+객체를 생성하기 위한 하나의 가이드
+단순히 종이만보고 설계하는 것이 아니라
+탬플릿이 있고 그 안에 내용만 채우는 것이라고 생각하면 됨
+강제성
+[접근제한자] interface 인터페이스명{
+// 상수도 멤버로 포함할 수 있음
+public static final 자료형 변수명 = 초기값;
+// 추상 메소드만 선언 가능
+[public abstract] 반환자료형 메소드명([자료형 매개변수]);
+// public abstract가 생략되기 때문에
+// 오버라이딩 시 반드시 public 표기해야 함
+
+가이드이기 때문에 실제 기능은 없다
+메소드에 대한 정의만 있음
+해당 인터페이스를 상속 받은 각각의 클래스에서 공통으로 사용해야 하는 어떤 데이터가 있다면
+상수형태로 고정을 시켜줄 수 있다.
+인터페이스를 상속받은 애들의 공통되는 점이 있다면 디폴트 메소드로 만들 수 있다.
+static으로 메소드 만듬 -> 객체 생성 안해도 사용할 수 있음
+
+추상클래스
+extends 단일 상속
+인터페이스
+implements 구현을 하는 개념, 다중 상속 가능
+
+
+--------------------------------------------------------------------------------------------
+
+API 어플리케이션 프로그램을 만들기 위한 인터페이스 ( 다리역할 )
+
+향상된 for문 = foreach문
+배열을 위한 for문
+for(대입받을 변수정의 : 배열명)
+arr 배열항목을 처음부터 하나씩 tmp에 대입하여 몸통부분을 실행하겠다.
+쉽게 말해 arr[0]을 tmp에 담아 몸통부분 실행하고
+arr[1] 값을 tmp에 담아 다시 담아 몸통부분을 실행하여, 배열의 총 길이만큼 for문이 돈다.
+향상된 for문은 배열을 가지고 반복작업을 할 때 많이 활용된다.
+단점으로는 배열만 사용가능하며, 배열값을 쓰는 것만 가능하고, 값을 직접 바꿀 수 없다.
+
+배열의 모든 값들을 출력하거나
+배열의 전체부분을 다 검사해야 할 경우에 사용할 수 있다.
+
+	for(int i=0 ; i<arr.length ; i++) {
+			System.out.println(arr[i]);
+		}
+
+	for( String tmp : arr ) {
+			System.out.println(tmp);
+		}
+
+--------------------------------------------------------------------------------------------
+
+StringBuffer 클래스와
+StringBuilder 클래스의 가장 큰 차이점
+=> 쓰레드 safe기능 제공 유무
+
+
+--------------------------------------------------------------------------------------------
+
+1. String 클래스의 기본 문자열 사용
+
+public void method01(){
+
+	String str = "Hello";	// 문자열 값 초기화 한 이후에는 수정이 불가능
+	System.out.println(str);	// 문자열 출력 
+	System.out.println(System.identityHashCode(str));	// str에 저장된 객체 주소 출력
+	// str 객체의 값이 변경되는게 아니라 새로운 객체를 만들어서 주소만 바꿔서 사용
+	
+	str = "안녕하세요"; 	// 문자열 값 변경
+	System.out.println(str);	// 문자열 출력
+	System.out.println(System.identityHashCode(str));	// str에 저장된 객체 주소 출력
+	
+	str = str + " 반갑습니다."; 	// 문자열 이어쓰기
+	System.out.println(str);	// 문자열 출력
+	System.out.println(System.identityHashCode(str));	// str에 저장된 객체 주소 출력
+	
+	// 서로 다른 String 객체의 문자열이 같은 경우 주소가 같음 - 하나의 문자열을 저장해서 같은 주소를 저장해서 사용
+	str = "Hello";
+	System.out.println(System.identityHashCode(str));	// str에 저장된 객체 주소 출력
+	String str2 = "Hello";
+	System.out.println(System.identityHashCode(str2));	// str2에 저장된 객체 주소 출력
+
+
+2. String 클래스 메소드 사용
+
+	public void method02() {
+
+	String str1 = "Hello";
+
+	// 1. 특정 위치(인덱스)의 문자 한개 추출
+	System.out.println(str1.charAt(4)); 	// o
+	// 2. 특정 문자의 위치(인덱스) 알아내기
+	System.out.println(str1.indexOf('e'));	// 1
+	// 3. 문자열 길이 구하기
+	System.out.println(str1.length());	// 5
+	// 4. 문자열 비교하기
+	System.out.println(str1 == "Hello");	// 각 참조 변수에 있는 주소를 비교
+	System.out.println(str1.contentEquals("Hello")); //실제 문자열 비교
+	System.out.println(System.identityHashCode(str1));
+	System.out.println(System.identityHashCode("Hello"));
+	System.out.println(str1.equalsIgnoreCase("hello")); // 대소문자 구문없이 비교
+	// 5. 문자열 치환 - 특정 문자열을 찾아서 특정 문자열로 변경한 결과값을 반환
+	System.out.println(str1);	// Hello
+	System.out.println(str1.replace("He", "Ba"));	// Ballo 
+	//str1의 값을 바꾸는 것이 아니라 str1에 있는 문자열을 가져와서 He를 찾아서 Ba로 바꿔줬을 뿐
+	System.out.println(str1);	// Hello - 객체에 저장되어 있는 값은 변경 안됨
+	str1 = str1.replace("H", "B"); // - 변경된 값을 저장하려면 대입연산자를 써서 대입해 줘야 함
+	System.out.println(str1);	// Bello
+	// 6. 대문자로 변환된 값 반환
+	System.out.println(str1.toUpperCase()); // BELLO
+	System.out.println(str1); // Bello
+	// 7. 소문자로 변환된 값 반환
+	System.out.println(str1.toLowerCase()); // bello
+	System.out.println(str1); // Bello
+	// 8. 특정 구분자를 기준으로 문자열 분할
+	String str2 = "Apple, Orange, Strawberry";
+	System.out.println(str2);
+	String[] arr = str2.split(", "); //문자열 형태의 배열에 저장
+	for(int i=0 ; i<arr.length ; i++) {
+		System.out.println(arr[i]);
+	}
+	// 향상된 for문 - for(자료형 임시변수명 : 배열명) { 실행내용; }
+	for( String tmp : arr ) {
+		System.out.println(tmp);
+	}
+}
+
+3. StringBuffer 클래스
+
+	public void method03() {
+
+	StringBuffer sb1 = new StringBuffer();	// 참조변수 생성 및 객체 생성
+	System.out.println(sb1);	// 아무것도 출력 안됨 - sb1 객체 안에 있는 문자열 출력
+	System.out.println(sb1.capacity());	// 16 - sb1 객체 버퍼의 크기를 출력한다. 몇 개 문자를 저장할 수 있는지
+	
+	StringBuffer sb2 = new StringBuffer(10);	// 객체 생성 시 정수형태로 버퍼 크기 지정
+	System.out.println(sb2);	// 아무것도 출력 안됨 - sb2 객체 안에 있는 문자열 출력
+	System.out.println(sb2.capacity());	// 10 - sb2 객체 버퍼의 크기 출력(지정한 크기 만큼 공간 만들어짐)
+	
+	StringBuffer sb3 = new StringBuffer("안녕하세요");	// 객체 생성 시 문자열 바로 입력
+	System.out.println(sb3);	// 안녕하세요 - sb3 객체 안에 있는 문자열 출력
+	System.out.println(sb3.capacity());	// 21 - sb3 객체 버퍼의 크기 출력(저장된문자열+16개 문자 저장공간 만들어짐)
+	
+	// 객체에 값 추가 - append
+	System.out.println("sb3객체 주소 : "+sb3.hashCode()); 	// sb3 객체 주소
+	System.out.println("sb3객체 크기 : "+sb3.capacity());	// 21
+	System.out.println("sb3글자 개수 : "+sb3.length());		// 5
+	sb3.append(" 반갑습니다.");	// 문자열 추가 , 현재 들어있는 문자열 뒤에 추가로 문자열 써줘	
+	System.out.println(sb3);	// 안녕하세요 반갑습니다.
+	System.out.println("sb3객체 주소 : "+sb3.hashCode()); 	// sb3 객체 주소
+	System.out.println("sb3객체 크기 : "+sb3.capacity());	// 21
+	System.out.println("sb3글자 개수 : "+sb3.length());		// 12
+	sb3.append(" 모두모두 열공하세요~!!");
+	System.out.println("sb3객체 주소 : "+sb3.hashCode()); 	// sb3 객체 주소
+	System.out.println("sb3객체 크기 : "+sb3.capacity());	// 44 - 버퍼 크기 자동으로 조정됨
+	System.out.println("sb3글자 개수 : "+sb3.length());		// 26 
+	
+	// 객체에 값 삽입 - insert
+	sb3.insert(0, "여러분 "
+			+ "");	// 0번 인덱스에 "여러분" 문자열 삽입
+	System.out.println(sb3);	// 여러분 안녕하세요 반갑습니다. 모두모두 열공하세요~!!
+	
+	// 객체의 값 삭제 - delete
+	sb3.delete(4,10);	// 4번 인덱스부터 9번 인덱스까지 문자열 삭제
+	System.out.println(sb3); // 여러분 반갑습니다. 모두모두 열공하세요~!!
+}
+
+
+4. StringBuilder 클래스
+
+	public void method04() {
+
+	StringBuilder sb1 = new StringBuilder();
+	System.out.println(sb1);	// 아무값 출력 안됨
+	System.out.println(sb1.capacity());	// 16
+	
+	StringBuilder sb2 = new StringBuilder(10);
+	System.out.println(sb2);	// 아무값 출력 안됨
+	System.out.println(sb2.capacity());	// 10
+	
+	StringBuilder sb3 = new StringBuilder("안녕하세요");
+	System.out.println(sb3);	// 안녕하세요
+	System.out.println(sb3.capacity());	// 21
+	
+	sb3.append(" 반갑습니다.");
+	System.out.println(sb3);
+	sb3.insert(0, "여러분 ");
+	System.out.println(sb3);
+	sb3.delete(4,10);
+	System.out.println(sb3);
+	
+		
+	}
+
+
+5. StringTokenizer 클래스
+
+	public void method05() {
+
+	String str = "AA|BB|CC|DD|EE|FF|GG"; 
+	//String[] arr = new String[???]; // 잘랐을 때 몇개가 될지 모름
+	StringTokenizer st = new StringTokenizer(str,"|");
+	System.out.println(st.countTokens()); // 몇 개 잘렸는지
+	String [] arr = new String[st.countTokens()];
+	int i=0;
+	while(st.hasMoreTokens()) { // 다음 내용이 있니? , 다음 내용이 있으면 들어가라
+		//System.out.println(st.nextToken()); // while문 안에 nextToken이 2개 들어가있어서 오류뜸
+		arr[i] = st.nextToken(); //다음 내용 나오게 함
+		System.out.println(arr[i]);
+		i++;
+	}
+	for(int j=0; j<arr.length ; j++) {
+		System.out.println(arr[j]);
+	}
+	}
+
+
+--------------------------------------------------------------------------------------------
+
+Wrapper 클래스
+https://mainichibenkyo.tistory.com/29
+
+- 기본자료형들을 객체형태로 바꿔서 사용하거나
+객체형태를 기본자료형으로 바꿔서 사용할 때가 있다.
+
+=> 기본자료형들을 데이터타입으로 받아서 객체화 시키는 클래스
+객체형태 자료형들을 데이터타입으로 받아서 기본자료화 시키는 클래스
+
+- 기본타입에 해당하는 데이터를 객체로 포장해주는 클래스
+- 프로그램에 따라 기본타입의 데이터를 객체로 취급해야 하는 경우 사용
+
+- 박싱(Boxing)
+	기본타입의 데이터를 Wrapper클래스의 인스턴스(객체)로 변환하는 과정
+	Integer num1 = new Integer(10); 
+	Wrapper클래스를 사용해 객체를 새로 만들면서 기본 타입의 데이터를 넣어주고
+	Integer형태의 참조변수에 넣어서 사용
+- 언박싱(UnBoxing)
+	Wrapper클래스의 인스턴스에 저장된 값을 다시 기본타입의 데이터로 변환하는 과정
+	int num2 = num1.intValue(); 
+
+- 오토 박싱(AutoBoxing), 오토 언박싱(AutoUnBoxing)
+	JDK 1.5 이상부터 박싱과 언박싱이 필요한 상황에서 자바 컴파일러가 자동으로 처리
+	
+	오토 박싱
+	Character ch1 = 'A'; ('A'라는 것은 기본 데이터 타입인데 알아서 박싱해서 넣어줌)
+	// 원래는 이렇게 넣어야함
+	Character ch1 = new Character('A'); 
+	
+	오토 언박싱
+	char ch2 = ch1;
+	// 원래는 이렇게 넣어야함
+	ch1.charValue();
+
+--------------------------------------------------------------------------------------------
+
+Wrapper 클래스 언제 쓰나?
+
+문자열과 기본자료형간의 변환 할 때 Wrapper 클래스가 가장 잘 활용된다.
+나는 이 안에 있는 값을 가져다가 정수형태로 쓰고 싶어, 실수 형태로 쓰고 싶어
+Wrapper로 가져와서 기본자료형으로 쓴다.
+
+// String을 기본 자료형으로 바꾸기
+	문자열을 넣었는데 기본자료형에 잘 들어간다
+	byte b = Byte.parseByte("1");
+	short s = Short.parseShort("2");
+	int i = Integer.parseInt("3");
+	long l = Long.parseLong("4");
+	float f = Float.parseFloat("0.1");
+	double d = Double.parseDouble("0.2");
+	boolean bool = Boolean.parseBoolean("true");
+	
+	char c = "abc".charAt(0);
+	
+// 기본 자료형을 String으로 바꾸기
+	String b = Byte.valueOf((byte)1).toString();
+	String s = Short.valueOf((short)2).toString();
+	String i = Integer.valueOf(3).toString();
+	String l = Long.valueOf(4L).toString();
+	String f = Float.valueOf(0.1f).toString();
+	String d = Double.valueOf(0.2).toString();
+	String bool = Boolean.valueOf(true).toString();
+	String ch  = Character.valueOf('a').toString();
+
+
+--------------------------------------------------------------------------------------------
+
+날짜 관련 클래스
+Date 클래스
+시스템으로부터 현재 날짜, 시간 정보를 가져와서 다룰 수 있게 만들어진 클래스
+생성자 2개만 사용 가능하고 나머지는 모두 deprecated
+Calender 클래스 혹은 GregorianCalender 클래스 사용 권장
+
+예시
+Date today = new Date();
+// 시스템으로부터 현재 날짜, 시간 정보를 가져와 기본 값으로 사용
+
+Date when = new Date(123456798L);
+// long형 정수 값을 가지고 날짜 시간 계산
+// 1970년 1월 1일 0시 0분 0초를 기준으로 함
+
+
+// Date 클래스
+public void method01() {
+	Date dt = new Date();
+	System.out.println(dt.toString()); // 문자열 형태
+	System.out.println(dt); // 객체 형태 
+	SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
+	System.out.println(sdf.format(dt));
+	// String dt1 = dt.toString(); // 문자열 형태로 가지고 와라
+}
+// Calender 클래스
+public void method02() {
+	Calendar today = Calendar.getInstance(); // Calendar의 static 메소드를 실행 시킨 것
+	
+	System.out.println(today.get(Calendar.YEAR));
+	System.out.println(today.get(Calendar.MONTH));
+		
+}
