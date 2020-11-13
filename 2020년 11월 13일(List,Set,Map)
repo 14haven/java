@@ -1,0 +1,625 @@
+2020년 11월 13일
+
+
+- Vector
+ArrayList랑 똑같이 생겼다고 보면 됨
+List의 후손으로 ArrayList와 동등하지만 동기화(Synchronized)를 제공한다는 점이 ArrayList와의 차이점
+
+하나의 공간에 갑자기 둘이 접근해서 둘다 쓰겠다하면 충돌이 발생할 수 있음 
+-> 제어를 해줌 
+-> 동기화를 제공
+-> List 객체들 중에서 가장 성능이 좋지 않음 (안정성은 높음)
+
+
+-----------------------------------------------------------------------------------
+
+System.out.println("---------- Vector -----------");
+	
+// Vector 객체 생성
+Vector list = new Vector();
+		
+// 리스트에 데이터 추가
+list.add(10);
+list.add(5);
+list.add(20);
+System.out.println(list);	//[10, 5, 20]
+list.add("Hello");
+System.out.println(list);	//[10, 5, 20, Hello]
+		
+// 리스트에 데이터 삽입(특정위치에 추가)
+list.add(2,25);
+System.out.println(list);	//[10, 5, 25, 20, Hello]
+
+// 리스트 데이터 사용
+System.out.println(list.get(0));	//10
+		
+// 반복문 활용
+	for(int i=0 ; i<list.size() ; i++) {
+	System.out.println(i+1+"번째 데이터 : "+list.get(i));
+	}
+		
+// 리스트 데이터 수정
+list.set(4, 30);
+System.out.println(list);	//[10, 5, 25, 20, 30]
+
+
+// 리스트 데이터 정렬
+Collections.sort(list); // 기본 오름차순 정렬
+System.out.println(list);	//[5, 10, 20, 25, 30]
+Collections.reverse(list);	// 내림차순 정렬
+System.out.println(list);	//[30, 25, 20, 10, 5]
+		
+// 리스트 데이터 삭제
+list.remove(2);
+System.out.println(list);	//[30, 25, 10, 5]
+
+// 리스트 전체 초기화(모든 데이터 삭제)
+list.clear();
+System.out.println(list);	//[]
+
+
+-----------------------------------------------------------------------------------
+
+- LinkedList 
+
+List의 후손으로, 인접 참조를 링크해 체인처럼 관리
+특정 인덱스에서 객체를 제거하거나 추가하게 되면 바로 앞/뒤
+링크만 변경하면 되기 때문에 객체 삭제와 삽입이 빈번하게 일어나는 곳에서는
+ArrayList보다 성능이 좋음
+
+
+각각의 공간에 따로따로 데이터들이 저장, 각각의 데이터들을 연결시켜줘서 서로서로 어디있는지 알 수 있게
+첫번째 데이터가 두번째 데이터의 위치를 가리키고 있도록 만든다.(어디있는지 알 수 있게)
+스택영역에 참조변수 하나를 만들어놓고 참조변수를 이용해 Heap 영역에 접근한다.
+두번째 데이터공간이 첫번째 데이터의 공간 주소를 담아 사용하던 참조변수를 사용하게 되면 
+첫번째 데이터의 주소를 잃어버리게됨
+그래서 그냥 참조변수에는 첫번째 데이터공간의 주소를 담는다
+두번째 데이터공간의 주소는 첫번째 애가 담는다.
+세번째 애 주소는 어디에 담아? -> 두번째 애가 담는다.
+
+내가 만약 데이터가 5000개 있음, 5000번째 찾고싶음 -> 끝까지 찾아가야함
+4000번째 찾고 싶으면 다시 앞으로 가서 4000번까지 가야함
+-> 비효율적
+더블링크드리스트 => 내 다음데이터, 내 전 데이터의 주소까지 알고 있다.
+
+
+중간에 데이터를 추가나 삭제하더라도 전체의 인덱스가 한 칸씩 뒤로 밀리거나 당겨지는 일이 없기에 
+ArrayList에 비해서 데이터의 추가나 삭제가 용이하나, 
+인덱스가 없기에 특정 요소에 접근하기 위해서는 순차 탐색이 필요로 하여 탐색 속도가 떨어진다는 단점이 있다.
+그러므로 탐색 또는 정렬을 자주 하는 경우엔 배열을 사용하고 
+데이터의 추가/삭제가 많은 경우 연결 리스트를 사용하는 것이 좋다.
+
+
+-----------------------------------------------------------------------------------
+
+LinkedList에는 이런 기능도 있다.
+list.addFirst();
+list.addLast();
+list.removeFirst();
+list.removeLast();
+
+
+System.out.println("------- LinkdedList -------");
+		
+// LinkedList 객체 생성
+LinkedList list = new LinkedList();
+
+// 리스트에 데이터 추가
+list.add(20);
+list.add(4);
+list.add(60);
+System.out.println(list);	//[20, 4, 60]
+		
+		
+// 리스트에 데이터를 삽입
+list.add(1,10);
+System.out.println(list);	//[20, 10, 4, 60]
+list.addFirst(25);
+System.out.println(list);	//[25, 20, 10, 4, 60]
+list.addLast(30);
+System.out.println(list);	//[25, 20, 10, 4, 60, 30]
+		
+// 리스트 데이터 사용
+System.out.println(list.get(3));	//4
+System.out.println(list.getFirst());	//25
+System.out.println(list.getLast());		//30
+		
+// 반복문 활용
+	for(int i=0 ; i<list.size() ; i++) {
+		System.out.println(i+1+"번째 데이터 : "+list.get(i));
+	}
+		
+/*
+ * 1번째 데이터 : 25
+ * 2번째 데이터 : 20
+ * 3번째 데이터 : 10
+ * 4번째 데이터 : 4
+ * 5번째 데이터 : 60
+ * 6번째 데이터 : 30
+ */
+		
+// 리스트 데이터 수정
+list.set(4, 35);
+System.out.println(list);	
+//[25, 20, 10, 4, 35, 30]
+		
+// 리스트 데이터 정렬
+Collections.sort(list);	// 오름차순 정렬
+System.out.println(list);	// [4, 10, 20, 25, 30, 35]
+Collections.reverse(list);	// 내림차순 정렬
+System.out.println(list);	// [35, 30, 25, 20, 10, 4]
+		
+// 리스트 데이터 삭제
+list.remove(3);
+System.out.println(list);	//[35, 30, 25, 10, 4]
+list.removeFirst();
+System.out.println(list);	//[30, 25, 10, 4]
+list.removeLast();
+System.out.println(list);	//[30, 25, 10]
+		
+// 리스트 초기화(리스트 내 모든 데이터 삭제)
+list.clear();
+System.out.println(list);	//[]
+			
+
+-----------------------------------------------------------------------------------
+
+
+- Set
+List와 성격이 다르다.
+
+저장 순서가 유지되지 않고, 중복 객체도 저장하지 못하게 하는 자료 구조
+List는 인덱스(순서번호)로 접근하는데 Set은 인덱스도 없다.
+null도 중복을 허용하지 않기 때문에 1개의 null만 저장
+구현 클래스로 HashSet, LinkedHashSet, TreeSet이 있음
+
+
+Set이라는 클래스가 있고
+그 안에 여러가지 메소드가 정의 돼 있고
+HashSet, LinkedHashSet, TreeSet 이런 애들이 상속 받아서 사용하는 것
+
+* 전체 객체 대상으로 한 번씩 반복해서 가져오는 반복자(Iterator)를 제공
+인덱스로 객체에 접근할 수 없음
+
+
+
+Hash Set
+Set에 객체를 저장할 때 hash함수를 사용하여 처리 속도가 빠름
+동일 객체 뿐 아니라 동등 객체도 중복하여 저장하지 않음
+
+LinkedHashSet
+HashSet과 거의 동일하지만
+Set에 추가되는 순서를 유지한다는 점이 다름
+(어쨌든 처음 저장할때는 순서대로 저장한다)
+
+
+Iterator
+컬렉션에 저장된 요소를 접근하는데 사용되는 인터페이스
+iterator() 메소드는 List와 Set 계열에서만 사용
+* 주요메소드
+hasNext() -> 데이터 있니?
+next() -> 데이터 가져와
+
+Iterator<E> 
+앞에서부터 검색
+boolean hasNext()
+E next()
+
+ListIterator<E>
+앞에서부터 검색
+boolean hasNext()
+E next()
+뒤에서부터 검색
+boolean hasPrevious()
+E previous
+
+
+-----------------------------------------------------------------------------------
+
+System.out.println("---------- HashSet ----------");
+//HashSet 객체 생성
+HashSet hs = new HashSet();
+		
+// Set에 데이터 추가
+hs.add(10);
+hs.add(5);
+hs.add(15);
+System.out.println(hs);	//[5, 10, 15]
+		
+// 중복요소 저장
+hs.add(10);
+System.out.println(hs);	//[5, 10, 15] -> 10이 이미 있기 때문에 안들어간다.
+		
+/*
+ *  Set 데이터 사용
+ *  - 인덱스가 없기 때문에 직접 접근해서 사용 할 수 없음
+ *  - Iterator 이용해서 데이터 사용
+ *  
+ */
+		
+Iterator it = hs.iterator(); // iterator 메소드를 사용하여 데이터를 긁어모아와서 it에 저장
+while(it.hasNext()) { // 니가 지금 가리키고 있는 곳에 데이터가 있니?
+System.out.println(it.next()); // 데이터 가지고 와라
+	}
+		
+/*
+ * 5
+ * 10
+ * 15
+ */
+
+
+// Set 데이터 삭제
+hs.remove(10);
+System.out.println(hs); //[5, 15]
+		
+// Set 초기화
+hs.clear();
+System.out.println(hs);	//[]
+		
+			
+// Set을 이용해 리스트의 중복된 데이터 제거
+ArrayList list = new ArrayList();
+list.add(10);
+list.add(5);
+list.add(20);
+list.add(10);
+list.add(20);
+System.out.println("리스트 데이터 : "+list); // [10, 5, 20, 10, 20] 중복된 데이터도 저장이 된 상태
+		
+System.out.println("셋 데이터 : "+hs); //[]
+hs.addAll(list);
+System.out.println("셋 데이터 : "+hs); //[20, 5, 10] 중복된 값이 사라졌다.
+
+// Set을 list에 추가하기
+
+list.clear(); //리스트 데이터: []
+System.out.println("리스트 데이터: "+list);
+//list.addAll(hs);
+//System.out.println("리스트 데이터: "+list);
+Iterator it2 = hs.iterator();
+while(it2.hasNext()) {
+	list.add(it2.next());
+}
+System.out.println("리스트 데이터 : "+list);	//리스트 데이터 :[10, 5, 20]
+
+
+가공해서 추가하기
+Iterator it2 = hs.iterator();
+while(it2.hasNext()) {
+list.add((int)(it2.next())+100);
+}
+
+System.out.println("리스트 데이터 : "+list); //리스트 데이터 : [110, 105, 120]
+
+
+-----------------------------------------------------------------------------------
+
+//HashSet hs = new HashSet();
+LinkedHashSet hs = new LinkedHashSet();
+LinkedHashSet으로 바꿨을 때
+
+
+// HashSet에 데이터 추가 했을땐
+hs.add(10);
+hs.add(5);
+hs.add(15);
+System.out.println(hs);	//[5, 10, 15] 순서없이 출력 됐었는데
+
+LinkedHashSet 에 데이터 추가 했을 땐 [10, 5, 15]로 출력된다.
+(저장한 순서대로 출력됨)
+
+
+-----------------------------------------------------------------------------------
+
+- Map
+키(key)와 값(value)으로 구성되어 있으며, 키와 값은 모두 객체
+각각의 공간에 이름을 붙여서 사용 -> 키
+키와 값이 하나의 공간
+키는 중복 저장을 허용하지 않고(Set방식), 값은 중복 저장 가능(List방식)
+키가 중복되는 경우, 기존에 있는 키에 해당하는 값을 덮어 씌움
+
+구현 클래스로 HashMap, Hashtable, LinkedHashMap, Properties, TreeMap이 있음
+
+-----------------------------------------------------------------------------------
+
+HashMap
+
+System.out.println("---------- HashMap ----------");
+// HashMap 객체 생성
+HashMap map = new HashMap();
+		
+// map에 데이터 추가 - put(키,값);
+map.put("name","홍길동"); // 키는 String 형태여야 한다.
+map.put("age",20);
+map.put("키", 17.5);
+map.put("1",10);
+System.out.println(map);	// {1=10, 키=17.5, name=홍길동, age=20}
+		
+// 키를 이용해 데이터 사용
+System.out.println(map.get("age")); // 20
+System.out.println(map.get("name"));// 홍길동
+		 
+// 중복된 키의 데이터를 추가
+map.put("1",100);
+System.out.println(map);	// {1=100, 키=17.5, name=홍길동, age=20}
+		
+// 키를 Set 형태로 반환
+System.out.println(map.keySet()); // [1, 키, name, age] 
+		
+// 값을 Collection 형태로 반환
+System.out.println(map.values()); // [100, 17.5, 홍길동, 20] 
+		
+// map 데이터 삭제
+map.remove("키");
+System.out.println(map);	//{1=100, name=홍길동, age=20}
+		
+// map 초기화
+map.clear();
+System.out.println(map);	//{}
+		
+
+
+//HashMap map = new HashMap();
+Hashtable map = new Hashtable();
+
+HashMap을 Hashtable로 바꿔도 아무런 문제가 생기지 않는다.
+둘의 차이는 동기화가 되냐 안되냐의 차이
+
+-----------------------------------------------------------------------------------
+
+- Properties
+키와 값을 String타입으로 제한한 Map 컬렉션
+주로 Properties는 프로퍼티(*.properties)파일을 읽어 들일 때 주로 사용
+
+프로퍼티(*.properties)파일
+- 옵션정보, 데이터베이스 연결정보, 국제화(다국어)정보를 기록하여 텍스트 파일로 활용
+- 애플리케이션에서 주로 변경이 잦은 문자열을 저장하여 관리하기 때문에 유지보수를 편리하게 만들어 줌
+- 키와 값이 '='기호로 연결되어 있는 텍스트 파일로 ISO 8859-1 문자셋으로 저장되고,
+ 한글은 유니코드(Unicode)로 변환되어 저장
+
+
+
+System.out.println("------- Properties -------");
+		
+// Properties 객체 생성
+Properties prop = new Properties();
+		
+	try {
+
+	prop.load(new FileReader("resources/config.properties")); 
+	//resources안에 config.properties 읽어올게
+
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+System.out.println("운영체제: "+prop.getProperty("OS"));
+System.out.println("버전: "+prop.getProperty("Version"));
+System.out.println("메모리: "+prop.getProperty("RAM"));
+
+
+-----------------------------------------------------------------------------------
+
+TreeSet과 TreeMap 
+검색 기능을 강화시킨 컬렉션으로, 계층 구조를 활용해 이진 트리 자료구조를 구현하여 제공
+* 트리 : 각 노드(하나하나의 데이터) 간 연결된 모양이 나무와 같다고 해서 붙여진 이름
+
+
+* TreeSet
+Set을 이용해 트리를 구성
+기본적으로 중복데이터 저장 안되고, 각각의 공간에 접근하기 위해 인덱스,키 값 사용 안한다.
+
+이진 트리를 기반으로 한 Set컬렉션으로,
+왼쪽과 오른쪽 자식 노드를 참조하기 위한 두 개의 변수로 구성
+이진 트리: 자기 자식이 최대 2명까지 올 수 있는 트리(자식이 없을 수도 있다.)
+
+* TreeMap
+Map을 트리 형태로, Map의 특징은 키와 값을 이용해서 데이터를 저장
+이진 트리를 기반으로 한 Map 컬렉션으로, 키와 값이 저장된 Map.Entry를 저장하고
+왼쪽과 오른쪽 자식 노드를 참조하기 위한 두 개의 변수로 구성
+
+
+TreeSet, TreeMap 정렬
+- 따로 정렬해주지 않아도 된다
+- TreeSet의 객체와 TreeMap의 Key는 저장과 동시에 자동으로 오름차순 정렬
+- 내림차순은 따로 구현 해줘야 함
+TreeSet, TreeMap 생성 시 매개변수 생성자를 통해 재정렬 가능
+Ex) 
+1. TreeSet<E> tSet
+	= new TreeSet(Comparator<? super E> comparator);
+   TreeMap<K,V> tMap
+	= new TreeMap(Comparator<? super K> comparator);
+
+2. 또 다른 방법으로 숫자(Integer,Double),문자열(String)타입을 제외한
+Comparable을 상속 받는 객체인 경우 compareTo()메소드의 오버라이딩 부분을
+내림차순으로 변경
+
+-----------------------------------------------------------------------------------
+
+TreeSet
+
+System.out.println("------- Tree -------");
+		
+// 객체 생성
+TreeSet tree = new TreeSet();
+		
+// 데이터 추가
+tree.add(10);
+tree.add(5);
+tree.add(20);
+System.out.println(tree);	//[5, 10, 20]
+		
+tree.add(1);
+System.out.println(tree);	//[1, 5, 10, 20]
+		
+tree.add(15);
+System.out.println(tree);	//[1, 5, 10, 15]
+	
+// 데이터 사용
+// 원래는Iterator로 변환해서 사용해야하는데
+System.out.println(tree.first());
+System.out.println(tree.last());
+// 이런식으로는 사용할 수 있다.
+		
+// 전체 데이터 가져오기 위해서는
+Iterator it = tree.iterator();
+while(it.hasNext()) {
+	System.out.println(it.next());
+}
+		
+// 데이터 삭제
+tree.remove(20);
+System.out.println(tree);	//[5, 10]
+		
+// 초기화
+tree.clear();
+System.out.println(tree);	//[]
+
+
+
+		
+-----------------------------------------------------------------------------------
+
+TreeMap
+
+
+System.out.println("--------- Tree Map ----------");
+
+// 객체
+TreeMap map = new TreeMap();
+// 데이터의 키를 기준으로 정렬할 경우 TreeMap 클래스를 유용하게 사용할 수 있다.
+		
+// 데이터 추가
+map.put("이름", "홍길동");
+map.put("age",20);
+map.put("키", 156.7);
+map.put("t",10);
+map.put("4",40);
+map.put("1",30);
+map.put("B",20);
+System.out.println(map);
+// {1=30, 4=40, B=20, age=20, t=10, 이름=홍길동, 키=156.7}
+// 키를 기준으로 정렬
+// 정렬 기준: 숫자 > 알파벳대문자> 알파벳소문자 > 한글
+		
+// 데이터 사용
+System.out.println(map.get("t"));
+	
+// 데이터 수정
+map.put("B",50);
+System.out.println(map);
+// {1=30, 4=40, B=50, age=20, t=10, 이름=홍길동, 키=156.7}
+		
+// 키를 Set 형태로 반환
+System.out.println(map.keySet());
+// [1, 4, B, age, t, 이름, 키]
+		
+// 데이터를 collection 형태로 반환
+System.out.println(map.values());
+// [30, 40, 50, 20, 10, 홍길동, 156.7]
+
+// 데이터 삭제
+map.remove("4");
+System.out.println(map);
+// {1=30, B=50, age=20, t=10, 이름=홍길동, 키=156.7}
+		
+// 초기화map.clear();
+System.out.println(map);
+// {}
+
+
+		
+-----------------------------------------------------------------------------------
+
+Stack
+후입선출(LIFO: Last In First Out) 구조로 JVM Stack 메모리가 Stack 구조로 되어 있음
+예) Stack<E> stack = new Stack<E>();
+
+메소드
+push(E item) 주어진 객체를 스택에 넣는다
+peek() 스택의 맨 위 객체를 가져온다. 객체를 스택에서 제거하지 않는다.
+pop() 스택의 맨 위의 객체를 가져온다. 객체를 스택에서 제거한다.
+
+
+System.out.println("------- Stack -------");
+		
+// 객체 생성
+Stack st = new Stack();
+		
+// 데이터 추가
+st.push(10);
+st.push(5);
+st.push(20);
+System.out.println(st); //[10, 5, 20]
+		
+// 데이터 사용 - peek() 가장 위에 데이터를 삭제하지 않고 확인할 수 있음
+System.out.println(st.peek());	//20	
+System.out.println(st.peek());
+System.out.println(st.peek());
+System.out.println(st.peek());	
+System.out.println(st);
+		
+// 데이터 사용 - pop() 가장 위에서부터 데이터를 하나씩 꺼내옴 - 꺼낸 데이터는 삭제됨
+int size = st.size() ;
+
+for(int i=0 ; i<size ; i++) {
+	System.out.println(st.pop());
+	}
+	
+System.out.println(st); //[]
+
+
+
+-----------------------------------------------------------------------------------
+		
+Queue 
+
+스케쥴링을 위해서 많이 사용하는 구조
+선입선출(FIFO: First In First Out) 구조로 작업 큐나 메시지 큐가 Queue 구조로 되어 있음
+예) Queue() queue = new LinkedList();
+
+offer(E e) 주어진 객체를 넣는다.
+peek() 객체를 하나 가져온다. 객체를 큐에서 제거하지 않는다.
+poll() 객체를 하나 가져온다. 객체를 큐에서 제거한다.
+
+
+System.out.println("------- Queue -------");
+// 객체 생성
+Queue que = new LinkedList();	
+		
+// 데이터 삽입
+que.offer(10);
+que.offer(5);
+que.offer(15);
+System.out.println(que);	//[10, 5, 15]
+		
+// 데이터 사용 - peek() 가장 앞에 있는 데이터 확인
+System.out.println(que.peek()); // 10
+	
+// 데이터 사용 - poll() 가장 앞에 있는 데이터 부터 순서대로 꺼내옴(꺼낸 데이터는 삭제됨)
+System.out.println(que.poll());	// 10 꺼내오고 삭제
+System.out.println(que.poll());	// 5 꺼내오고 삭제
+System.out.println(que.poll());	// 15 꺼내오고 삭제
+System.out.println(que);	// []
+
+
+-----------------------------------------------------------------------------------
+
+Deque 
+
+큐랑 똑같이 생겼는데
+양쪽으로 넣고 뺄 수 있음
+
+큐와 스택의 성질을 모두 가지고 있는 구조로 검색과 같은 반복적인 문제에 특히 유용한 구조
+
+Push, offer,add(E e) 해당 메소드 뿐만 아니라 메소드 뒤 First, Last를 붙여 앞 뒤에 주어진 객체를 넣는다.
+Peek, get() 해당 메소드 뿐만 아니라 메소드 뒤 First,Last를 붙여 객체를 가져온다. 객체를 큐에서 제거하지 않는다.
+Poll,remove() 해당 메소드 뿐만 아니라 메소드 뒤 First,Last를 붙여 객체를 하나 가져온다. 객체를 큐에서 제거한다.
+
+
+	
