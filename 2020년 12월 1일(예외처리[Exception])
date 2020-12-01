@@ -1,0 +1,191 @@
+2020년 12월 1일 자바
+
+예외처리 (Exception) 
+- 무엇에 대해 예외를 처리할 것인지
+
+* 프로그램 오류
+프로그램 수행 시 치명적 상황이 발생하여 비정상 종료 상황이 발생한 것,
+프로그램 에러라고도 함
+
+오류의 종류
+1. 컴파일 에러 : 프로그램의 실행을 막는 소스 상의 문법 에러, 소스 구문을 수정하여 해결
+(컴파일 하는 단계에서 오류 -> 프로그램이 아예 안만들어짐)
+2. 런타임 에러 : 입력 값이 틀렸거나, 배열의 인덱스 범위를 벗어났거나,
+계산식의 오류 등 주로 if문 사용으로 에러 처리
+(컴파일은 되는데 실행중에 발생하는 오류, 디버깅을 이용)
+3. 논리 에러 : 문법상 문제가 없고, 런타임 에러도 발생하지 않지만, 개발자의 의도대로 작동하지 않음.
+(어떻게 보면 런타임 오류에 해당됨,
+이 값이 나와야 하는데 오류는 안뜨는데 이 값이 안나옴, 디버깅을 이용)
+4. 시스템 에러 : 컴퓨터 오작동으로 인한 에러, 소스 구문으로 해결 불가
+
+어떤 오류냐에 따라 차이는 있겠지만 소스 코드에서 수정 가능한 에러들이 있고,
+소스 코드에서 수정 불가능한 에러들이 있음
+소스코드에서 수정 불가능한 에러들은 다양한 예외처리를 할 수 있다.
+(물론 소스코드에서 수정 가능한 에러들도 예외처리 가능)
+
+--------------------------------------------------------------------------------------
+
+* Exception (예외)
+Exception(예외)
+프로그램 오류 중 적절한 코드에 의해서 수습될 수 있는 미약한 오류.
+예외발생상황을 예측해서 미리 예외처리코드를 작성해 둠
+NullPointerException, ArithmeticException, IOException 등.
+
+예외처리
+프로그램을 만든 프로그래머가 상정한 정상적인 처리에서 벗어나는
+경우에 이를 처리하기 위한 방법
+예측 가능한 에러를 처리하는 것
+프로그램의 비정상적인 종류를 막고, 정상적인 실행상태를 유지하기 위함
+
+--------------------------------------------------------------------------------------
+
+* 예외 클래스 계층 구조
+Exception과 Error 클래스 모두 Object 클래스의 자손
+모든 예외의 최고 조상은 Exception 클래스
+Checked Exception : 소스 코드 상에서 반드시 개발자가 처리해야 하는 예외
+(IOException, EOFException, FileNotFoundExcepiton 등)
+Unchecked Exception :  소스 코드 상에서 개발자가 다룰 필요가 없는 예외
+(RuntimeException, ArithmeticException, NullPointerException, IndexOutOfBoundsException 등)
+
+
+--------------------------------------------------------------------------------------
+
+RuntimeException 클래스
+Unchecked Exception으로 주로 프로그래머의 부주의로 인한 오류인 경우가
+많기 때문에 예외 처리보다 코드를 수정해야 하는 경우가 많음 (오타 같은 것들)
+예외처리를 강제화하지 않음
+
+
+RuntimeException 후손 클래스
+- ArithmeticException
+0으로 나누는 경우 발생, if문으로 나누는 수가 0인지 검사
+- ArrayIndexOutOfBoundsException
+배열의 index범위를 넘어서 참조하는 경우, 배열명.length를 사용하여 배열의 범위 확인
+(5칸짜리 배열, 0부터 4까지 있는데 5번 인덱스를 참조할 경우 발생)
+- NegativeArraySizeException
+배열 크기를 음수로 지정한 경우 발생, 배열 크기를 0보다 크게 지정해야 함
+- ClassCastException
+Cast 연산자 사용 시 타입 오류 instanceof 연산자로 객체타입 확인 후 cast연산
+- NullPointerException
+Null인 참조 변수로 객체 멤버 참조 시도 시 발생,
+객체 사용 전에 참조 변수가 null 인지 확인
+
+
+--------------------------------------------------------------------------------------
+
+Exception 확인하기 (Checked Exception)
+
+Java API Document(자바에서 미리 만들어 놓은 클래스들, java api 8에서 확인 가능)
+에서 해당 클래스에 대한 생성자나 메소드를 검색하면
+그 메소드가 어떤 Exception을 발생시킬 가능성이 있는지 확인 가능.
+
+이런 명령문을 쓸 때에는 이런이런 오류가 발생할 수 있으니
+이런이런 예외를 사용하세요 라고 정의해 놓은 것.
+특정 API를 사용할 때 그 안에서 예외처리를 반드시 해야하는 경우에는 예외처리 따로 해줘야 한다.
+
+예) java.io.bufferedReader의 readLine() 메소드
+public String readLine()
+throws IOException
+
+-> IOException에 대한 예외처리를 해줘야 한다.
+
+
+예외처리 하는데에는 크게 세가지 방법이 있다.
+1. if
+2. try - catch 문
+3. throws
+
+
+--------------------------------------------------------------------------------------
+
+예외처리 방법 1
+Exception이 발생한 곳에서 직접 처리
+
+ try~catch문을 이용하여 예외처리
+
+try : exception 발생할 가능성이 있는 코드를 안에 기술
+(일단 예외가 발생할 수 있을 것 같은데 일단 한번 시도해봐)
+
+catch : try 구문에서 exception 발생 시 해당하는 exception에 대한 처리 기술
+(예외에 대한 걸 받아주는 것)
+여러 개의 exception 처리가 가능하나 exception 간의 상속 관계 고려
+(다중으로 설정할 수 있다. multi catch)
+
+finally : exception 발생 여부와 관계없이 꼭 처리해야 하는 로직 기술
+중간에 return문(finally 하고 메소드 종료)을 만나도 finally구문은 실행되지만
+System.exit(); (finally 안하고 바로 종료)를 만나면 무조건 프로그램 종료
+주로 java.io나 java.sql 패키지의 메소드 처리 시 이용
+(예외가 발생하든 안하든 무조건 실행해야 함,
+try - catch 밑에 finally 적어주고 실행함, return을 하더라도 finally 까지는 하고 종료)
+
+
+try ~ catch 표현식 (그 자리에서 바로 예외처리)
+try{
+// 반드시 예외 처리를 해야 하는 구문 작성, 시도해볼 코드들
+}catch(처리해야할예외클래스명 참조형변수명){
+// 잡은 예외 클래스에 대한 처리 구문 작성
+}finally{
+// 실행 도중 해당 Exception이 발생을 하던,
+// 안하던 마지막에 반드시 실행해야 하는 구문 작성
+}
+
+
+예제
+1. if문을 이용한 예외처리
+	int num1 = 100;
+	int num2 = 0;
+	System.out.println("자바 오랜만~! 반갑~!");
+	// if문을 이용한 예외처리
+	if (num2 == 0) {
+		System.out.println("0으로 나눌 수 없습니다");
+	}else {
+		System.out.println(num1/num2);
+	}
+		System.out.println("프로그램 종료");
+
+	
+2. try~catch문을 이용한 예외처리
+	// try + ctrl+space
+	try {
+		System.out.println(num1/num2);
+		System.out.println("try 내부 명령문");
+	} catch (Exception e) { 
+		// 원래라면 ArithmeticException을 적어줘야 하지만 모든 예외에 대한 동일한 처리를 해주고 싶으면 예외의 최상위 클래스인 Exception 적어줌
+	System.out.println("0으로 나눌 수 없습니다");
+	System.out.println("예외 메시지 : " +e.getMessage()); 
+	// e라는 애가 오류를 담고 있음, 예외 메시지 : / by zero (0으로 나눌 수 없다)
+	}
+	
+	System.out.println("프로그램 종료");
+	
+		
+3. try~catch~finally문을 이용한 예외처리
+	num2 = 5;
+	try {
+		System.out.println(num1/num2);
+	} catch (Exception e) { 
+		System.out.println("0으로 나눌 수 없습니다");
+		System.out.println("예외 메시지 : " +e.getMessage()); 
+	} finally {
+		System.out.println("try 내부 명령문");
+	}
+		
+	System.out.println("프로그램 종료");
+		
+		
+4. 멀티 catch문 (여러개의 catch를 사용해서 여러가지 예외를 처리)
+	// ctrl + shift + m
+	Scanner sc = new Scanner(System.in);
+	
+	System.out.println("--- 나눗셈 프로그램---");
+	System.out.print("첫번째 수 입력 : ");
+	int var1 = sc.nextInt();
+	System.out.print("두번째 수 입력 : ");
+	int var2 = sc.nextInt();
+	try {
+		System.out.println("결과 : "+(var1/var2));
+	}catch(ArithmeticException e) {
+		System.out.println("0으로 나눌 수 없습니다~!!");
+	}
+	
+	System.out.println("프로그램 종료");
