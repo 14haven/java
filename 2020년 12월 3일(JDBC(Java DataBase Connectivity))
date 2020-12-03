@@ -1,0 +1,303 @@
+2020년 12월 3일
+
+JDBC 사용 객체 
+
+* Class.forName()
+DriverManager를 사용하기전에 Class.forNmae() 메소드를 사용해야 한다.
+Class 라는이름의 Class
+forName은 객체를 생성해서 사용할 수 있는게 아니라 바로 사용할 수 있다. (정적 메소드)
+문자열 형태로 전달된 클래스를 JVM으로 로드해주는 기능을 한다.
+드라이버나 라이브러리들 다양한 클래스를 읽어와서 우리 프로젝트에서 사용할 수 있게 초기화 시켜주는 역할
+
+->
+우리는 오라클 JDBC 드라이버를 우리 라이브러리에 포함했음
+우리 프로젝트 안에서 사용할거임
+얘는 그 안에 실제로 들어가있는 클래스 내용이 문자열 형태로 되어있음
+우리 JVM은 우리가 원래 쓰던게 아니기 때문에 그냥 가지고 오지를 못함
+그래서 Class.forName() 안에 우리가 사용할 드라이버 지정해줄거임
+이 패키지안에 있는 이 클래스를 가지고와줘
+Class.forName("oracle.jdbc.driver./ 패키지 OracleDriver /클래스");
+내가 쓸 수 있게 해줘
+
+Orace JDBC는 우리 기본 라이브러리가 아니기 때문에 로드부터 시켜준 다음에 나머지 애들을 사용해야 한다.
+그런데 내가 쓸때마다 이 라이브러리 등록하기 귀찮다
+JDBC 4.0 이후로는 메소드를 호출하지 않아도 자동으로 로드 됨
+지금은 생략 가능
+
+
+* DriverManager
+JDBC드라이버를 통하여 Connection을 만드는 역할
+직접 객체 생성이 불가능하고 DriverManager 안에 있는 getConnection() 메소드를 사용하여서 객체 생성 가능
+DriverManager.getConnection("JDBC형식 URL","계정","비밀번호");
+JDBC 형식 URL : DBMS의 주소(데이터베이스를 찾아가는 주소)
+DBMS한테 나 너한테 연결좀 해서 쓸게
+DBMS는 인증 성공하면 너 앞으로 나한테 들어올때 이 값을 들고 가져와 하면서 식별값을 줌
+Connection 이라는 객체를 만들어서 담아 줌
+
+JDBC 형식의 URL 
+jdbc:orale:thin:[hostname][:port]:dbname
+hostname : DBMS가 있는 곳의 주소(DBMS가 다른 컴퓨터에 있을 수도 있음, IP나 도메인 주소 입력
+DBMS가 나랑 같은 컴퓨터에 있으면 나 자신의 주소 127.0.0.1 혹은 localhost라고 적음)
+
+문제는 이 주소만을 가지고는 딱 컴퓨터까지밖에 못찾음
+프로그램마다 포트 번호 부여되어있음 (포트번호 : 서비스를 제공해주기 위한 번호)
+포트번호도 적어주어야 함
+dbname -> express 버전 이름 하나밖에 없음 : XE
+
+여기에 입력하는 계정은 어디에서 만들어 놓은 계정? 
+DB에 접근할 것이기 때문에 Oracle DBMS에서 만들어놓은 계정 입력
+
+getConnection을 이용해서 연결을 하게 되면
+정보를 Connection이라는 객체에 담아서 사용할것임
+
+
+* Connection
+특정 데이터 원본과 연결된 Connection
+Connection 객체의 createStatement() 라는 메소드를 호출하여 Statement 객체를 생성한다.
+Statement 객체 : 다양한 명령문들을 보내고 그에 대한 결과를 받음
+DBMS에서 실행돼야 하는 명령문들이기 때문에 SQL 명령문으로 적음
+Statement 객체를 이용해서 나 보낼게요 하면 
+어떤 DBMS에 어떤 계정으로 어떤 데이터베이스를 보내야할지 모름
+이건 Connection만 알고 있음
+그래서 Connection을 이용해서 내가 명령을 보낼 수 있는 객체를 만들어줌
+어떤 Connection을 이용해서 Statement 객체를 만드느냐에 따라 
+Statement을 이용해서 명령을 보냈을 때 누구한테 보내는지가 결정됨
+
+SQL 문장을 실행(Statement문을 이용해서 명령문을 보내겠다)시키기 전에
+우선 Connectin 객체가 있어야 함
+<Connection객체명>.createStatement();
+객체 사용 완료 후 반드시 닫아 줘야 함
+<Connection객체명>.close();
+
+
+
+* Statement
+데이터베이스 연결을 한 후 실제 SQL문을 수행하기 위한 객체
+Connection클래스의 createStatement() 메소드를 호출하여 생성됨
+SQL문을 String객체에 담아 인자로 전달
+executeQuerty(), executeUpdate() 메소드를 호출하여 SQL 질의 수행
+<Statement객체명>.executeQuery(<SQL문>)
+<Statement객체명>.executeUpdate(<SQL문>)
+객체 사용 완료 후 반드시 닫아줘야 함
+<Statement객체명>.close();
+
+executeQuery() 메소드
+ResultSet을 반환하는 SQL 문에 사용하는 메소드로 주로 SELECT문을 이용하는 조회에 사용
+executeUpdate() 메소드
+SELECT를 제외한 DML(INSERT,UPDATE,DELETE)과 DDL(CREATE,DROP,ALTER) 구문을 수행하기 위한
+메소드로 DML을 수행한 경우 영향 받은 행의 수를 반환하고, DDL을 수행한 경우 0을 반환
+
+
+Statement같은경우에는 쿼리를 만드는 방식(SQL문을 완성하냐 마냐)에 따라서
+일반 Statement와 PreparedStatement로 나뉜다.
+
+
+일반 Statement
+미리 다 SQL문을 완성해서 전송
+try{
+//일반 조회문 다 완성을 시킴
+String query = "SELECT ID, LAST_NAME FROM EMP";
+stmt = conn.createStatement();	// sql문 보낼 수 있는 Statement 객체 생성
+rset = stmt.executeQuery(query);	// 보내고 결과를 rset에 담는다.
+} catch(SQLExeption e) {
+	e.printStackTrace();
+}
+
+PreparedStatement
+미완성된 SQL문을 받아와서 하나하나 전송
+데이터베이스 연결을 한 후 실제 SQL문을 수행하기 위한 객체
+일반 Statement와 다른점
+SQL문장이 미리 컴파일이 되고 실행 시간 동안 인수 값을 위한 공간을 확보한다는 점에서 다름
+각 인수에 대한 위치 홀더(?)를 사용해 SQL문장을 정의할 수 있게 함
+
+위치홀더(?)
+SQL문장에 나타나는 토큰(하나의 기호)으로 SQL구문이 실행되기 전에 실제 값으로 대체되어야 함
+<PreparedStatement객체명>.setString(위치,값)
+
+예)
+try {
+String query = "INSERT INTO MEMVER VALUES(?,?)"; // 물음표가 위치 홀더의 기호
+pstmt = conn.preparedStatement(query); // 위에서 작성한 쿼리문을 바로 넣어줌
+// ?,? 안에 각각의 값을 입력할 수 있다.
+pstmt.setString(1,id); 물음표의 위치, 뒤에 실제 들어갈 값
+첫번째 물음표에는 id
+pstmt.setString(2,password);
+두번째 물음표에는 password
+쿼리문 완성되면 DB한테 보내야 함
+pstmt.excuteUpdate(); 앞에서 미리 넣어줬기 때문에 excute할때는 ()안에 query문 넣어줄 필요 없음
+} catch(SQLException e){
+	e.printStackTrace();
+}
+
+
+* ResultSet
+SELECT문을 사용한 질의 성공 시 반환되는 객체
+Statement로 SQL 질의에 의해 생성된 테이블을 담아서 사용
+
+커서(cursor)로 특정 행에 대한 참조를 조작
+<ResultSet객체명>.next();
+커서가 위치한 행의 데이터 사용
+<ResultSetr객체명>.getString(<컬럼명|인덱스>);
+객체 사용 완료 후 반드시 닫아 줘야 함
+<ResultSet  객체명>.close();
+
+데이터가 하나만 있을 수 있겠지만 여러개 있을 수 있음
+만약 테이블의 두번째에 있는 아이디 값을 가지고 오고 싶다
+열번째 있는 아이디에 LAST_NAME값을 가지고 오고 싶다. 하면
+내가 데이터 몇개 있는지 모르고, 뭐 가져와야하는지 모른다
+ResultSet은 커서를 이용해서 각각의 데이터에 접근한다.
+DBMS에 요청해서 결과값을 받아오면 테이블이 생긴다.
+첫번째 로우, 첫번째 데이터를 보고 싶어
+next() 메소드를 쓰면 한칸 내려옴 -> 첫번째 데이터 사용 가능
+rset.getString("ID");  컬럼을 부르면 이제는 커서가 첫번째 데이터를 가리키고 있으니까 10001을 가리킴
+rset.getString("LAST_NAME") = rset.getString(2);
+컬럼 번호로 불러도 됨
+그다음에 또다시 rset.next(); 하면 두번째 데이터 사용 가능
+rset.getString("ID"); 하면 1002를 가리키게 됨
+
+next(); -> true -> get.method() 써서 값 가져옴
+next(); 하다가 더이상 데이터가 없다 -> 결과값으로 false 반환
+
+기본적으로 ResultSet은 무조건 위에서 밑으로 내려가는 형식으로만 사용할 수 있다.
+그래서 일반적으로ReusltSet으로 데이터 다 받아온 다음에
+배열 형태로 다 넣어놓고 그 이후에 다양한 방법으로 사용한다.
+
+
+-------------------------------------------------------------------------------------------------------------
+
+
+// Statement : Insert1 (기본 연동 실습)
+	public void method01() {
+		System.out.println("------- Statement : Inset1 (기본연동실습) -------");
+	// [JDBC 작업 순서]
+		// 1. Driver 등록 (DriverManger)
+		// 2. DBMS와 연결 (Connection)
+		// 3. SQL 생성 (String)
+		// 4. SQL 전송 (Statement)
+		// 5. 결과 받기 (ResultSet || int)
+		// 6. 연결 닫기 (close)
+		
+	// DBMS와 연동하기 위한 참조변수 생성 (닫아줘야하는 애들이 있어서)
+		// DriverManager는 직접 객체 생성 불가능
+		Connection conn = null;
+		String query = null;
+		Statement stmt = null;
+		int result = 0; // INSERT 할거니까 반환값은 정수이기 때문에
+		try {
+		// 1. Driver 등록(DriverManager)
+			// 기존에는 코드에서 드라이버 클래스를 별도로 등록해 줘야 했으나 현재는 안해줘도 됨
+			// Class.forName("oracle.jdbc.driver.OracleDriver"); , 예외처리 필수
+	
+		// 2. DBMS와 연결(Connection)
+			// DriverManager.getConnection("JDBC형식URL","계정","패스워드");
+			// JDBC 형식의 URL : 접속할 DBMS 정보(DBMS마다 설정 내용이 조금씩 다름)
+			// 오라클 - jdbc:oracle:thin:[@hostname][:port]:dbname
+			
+				conn = DriverManager.getConnection
+						("jdbc:oracle:thin:@localhost:1521:XE","STUDENT","STUDENTPASS");
+			
+		// 3. SQL 생성 (String)
+			query = "INSERT INTO MEMBER VALUES('chuchu','1234qwer','춘향이',"
+					+ "'F','20','chuchu@kh.com','01085207676','서울시 종로구','공부','"
+					+new java.sql.Date(new java.util.Date().getTime()) +"')";
+			// 생성된 쿼리문 확인
+			System.out.println(query);
+//			// 자바와 오라클 날짜처리(Date) 방법
+//			java.util.Date dt = new java.util.Date();
+//			System.out.println(dt); // Thu Dec 03 16:41:45 KST 2020
+//			java.sql.Date sdt = new java.sql.Date(dt.getTime()); // 현재 날짜 알아와서 sql형식으로 바꿈
+//			System.out.println(sdt);	// 2020-12-03
+		
+		// 4. SQL 전송(Statement) + // 5. 결과 받기(ResultSet | int)
+			// 쿼리문을 전송하기 위한 Statement 객체 생성
+			stmt = conn.createStatement();
+			// 쿼리문 전송 후 결과값을 result 변수에 저장장
+			result = stmt.executeUpdate(query);
+			// 결과 확인
+			System.out.println("결과 : "+result);
+		} catch (SQLException e) {
+				System.out.println("삽입 오류 발생 : 관리자에게 문의하세요.");
+				//e.printStackTrace();
+		} finally {
+			// 6. 연결 닫기 (close)
+			try {
+				stmt.close();
+				conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+			
+		
+		
+		
+	}	
+
+-------------------------------------------------------------------------------------------------------------
+
+Member라는 테이블이랑 똑같은 클래스를 하나 만들어줄거임
+
+import java.sql.Date;
+
+public class Member {
+// 필드부
+	// DB의 Member 테이블에 정의되어 있는 컬럼들을 필드로 정의
+		// MEMBER_ID, MEMBER_PWD, MEMBER_NAME, GENDER, 
+		// AGE, EMAIL, PHONE, ADDRESS, HOBBY, ENROLL_DATE
+	private String memberId;
+	private String memberPwd;
+	private String memberName;
+	private char gender;
+	private int age;
+	private String email;
+	private String phone;
+	private String address;
+	private String hobby;
+	private Date enrollDate;
+	
+// 생성자부
+	public Member() {}
+	public Member(String memberId, String memberPwd, String memberName, char gender,
+			int age, String email, String phone, String address, String hobby, Date enrollDate) {
+		this.memberId = memberId;
+		this.memberPwd = memberPwd;
+		this.memberName = memberName;
+		this.gender = gender;
+		this.age = age;
+		this.email = email;
+		this.phone = phone;
+		this.address = address;
+		this.hobby = hobby;
+		this.enrollDate = enrollDate;
+	}
+// 메소드부
+	// Getter / Setter 메소드
+	public String getMemberId() { return memberId; }
+	public void setMemberId(String memberId) { this.memberId = memberId; }
+	public String getMemberPwd() { return memberPwd; }
+	public void setMemberPwd(String memberPwd) { this.memberPwd = memberPwd; }
+	public String getMemberName() { return memberName; }
+	public void setMemberName(String memberName) { this.memberName = memberName; }
+	public char getGender() { return gender; }
+	public void setGender(char gender) { this.gender = gender; }
+	public int getAge() { return age; }
+	public void setAge(int age) { this.age = age; }
+	public String getEmail() { return email; }
+	public void setEmail(String email) { this.email = email; }
+	public String getPhone() { return phone; }
+	public void setPhone(String phone) { this.phone = phone;}
+	public String getAddress() { return address; }
+	public void setAddress(String address) { this.address = address; }
+	public String getHobby() { return hobby; }
+	public void setHobby(String hobby) { this.hobby = hobby; }
+	public Date getEnrollDate() { return enrollDate; }
+	public void setEnrollDate(Date enrollDate) { this.enrollDate = enrollDate; }
+	
+	// toString() 메소드 오버라이딩
+	@Override
+	public String toString() {
+		return memberId+" / "+memberPwd+" / "+memberName+" / "+gender+" / "+
+				age+" / "+email+" / "+phone+" / "+address+" / "+hobby+" / "+enrollDate;
+	}
+}
+
