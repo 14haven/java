@@ -1,0 +1,171 @@
+2020년 12월 3일
+
+* 객체보조스트림 역직렬화
+파일에 있는 데이터를 바이트 형태로 가지고 와서 객체 형태로 변환을 해줘야 하는데
+어떤 객체로 변환할지 모르기때문에 모든 객체의 조상인 Object 형태로 가지고온다.
+Object 형태로 가지고 온걸 제대로 쓰려면 Student 형태로 바꿔서 사용을 해야 한다.
+Student 형태의 Class를 저장한것이기 때문에
+나 가지고 온 데이터 Student 형태로 사용할게 -> Student 형태로 강제 형변환
+ObjectInputStream 의 반환자료형 -> Object임 
+(Student)로 강제형변환
+inSt = (Student) ois.readObject();
+
+
+* 객체보조스트림 사용하기
+import java.io.Serializable;
+
+// 직렬화를 위해서는 Serializable 인터페이스를 구현해 줘야 함(안하면 직렬화 시 오류 발생)
+public class Student implements Serializable{
+
+// 필드부
+	//[접근제한자] [키워드] <데이터타입> <필드명> [ = <초기값>];
+	
+	// 직렬화시에 사용되는 객체의 고유번호(serialVersionUid)
+		// 직렬화 인터페이스 구현 시 필드를 정의하지 않으면 경고 발생함
+		// 선언 안해도 JVM이 임의 번호를 붙여서 생성하지만 직접 선언하는 것을 권장함
+	private static final long serialVersionUID = 4489726448094257809L;
+	
+	private String name;
+	private int age;
+	private String tel;
+	private String addr;
+	
+// 생성자부
+	//[접근제한자] [키워드] <클래스명>([매개변수,..]){[실행내용;...}
+	// 기본 디폴트 생성자
+	public Student() {}
+	// 매개변수 생성자
+	public Student(String name, int age, String tel, String addr) {
+		this.name = name;
+		this.age = age;
+		this.tel = tel;
+		this.addr = addr;
+	}
+// 메소드부 
+	// Getter/Setter 메소드
+	public String getName() { return this.name; }
+	public void setName(String name) { this.name = name; }
+	public int getAge() { return age;}
+	public void setAge(int age) { this.age = age; }
+	public String getTel() { return tel; }
+	public void setTel(String tel) { this.tel = tel;}
+	public String getAddr() { return addr; }
+	public void setAddr(String addr) { this.addr = addr; }
+	
+	// Object클래스에 있는 toString 메소드 오버라이딩
+		// 필드의 내용을 한 번에 출력해서 확인하기 위한 용도
+	public String toString() {
+		return "이름 : "+name+", 나이 : "+age+", 전화번호 : "+tel+", 주소 : "+addr;
+		//return "[name=>"+name+", age=>"+age+", tel=>"+tel+", addr=>"+addr+"]";
+	}
+}
+
+
+실행부
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
+import com.kh.exam02.model.vo.Student;
+
+public class Run {
+
+	public static void main(String[] args) {
+		// Student st : 클래스의 참조변수를 생성
+		// = new Student() : 객체 생성 후 주소를 참조변수에 저장
+		Student st = new Student("홍길동",20,"01012341234","서울시 종로구");
+		// 객체의 각 필드 내용 출력
+		System.out.println(st.toString());
+		
+		// 객체를 파일로 저장
+		// 파일 출력 스트림, 객체 출력 보조 스트림에 대한 참조 변수 생성
+		FileOutputStream fos = null;
+		ObjectOutputStream oos = null;
+		// 파일 입출력 시 예외 발생할 수 있기 때문에 반드시 예외처리를 해줘야 함
+		try {
+			// 파일 출력 스트림 객체 생성(주 스트림 : 실제 통로를 만들어주는 스트림)
+			fos = new FileOutputStream("C:\\iotest\\student.txt");
+			// 객체 출력 보조 스트림 객체 생성
+			oos = new ObjectOutputStream(fos);
+			
+			// 보조 스트림을 이용해서 객체를 파일로 쓰기
+			oos.writeObject(st); 	// 오브젝트를 써라, 자동으로 직렬화해서 사용
+			System.out.println("저장완료");
+		} catch (IOException e) {
+			System.out.println("예외발생");
+		} finally {
+			try {
+				oos.close();
+				fos.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	
+
+	// 파일에 저장된 객체 읽어오기
+		// 파일 입력 스트림, 객체 입력 보조 스트림 참조변수 생성
+		FileInputStream fis = null;
+		ObjectInputStream ois = null;
+	
+		// 읽어온 객체를 저장할 참조변수 생성
+		Student inSt = null;
+		
+		try {
+			fis = new FileInputStream("C:\\iotest\\student.txt");
+			ois = new ObjectInputStream(fis);
+			
+			inSt = (Student) ois.readObject();
+			 System.out.println(inSt.toString());
+			 
+		} catch (IOException e) {
+			System.out.println("예외 발생");
+			// e.printStackTrace();
+		} catch (ClassNotFoundException e) { // 클래스를 못찾았을 때 뜨는 오류
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			try {
+				ois.close();
+				fis.close(); // 닫아줄 때에는 가장 마지막으로 연것부터 닫아주는게 좋다
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+		}
+		
+}
+}
+
+
+
+
+직렬화해서 파일에 저장할 때 Class에 직렬화시키고 싶지 않은게 있을 때
+transeint : 파일에 필드저장자체를 안하게 함, 필드자체를 안가져감
+Student 클래스
+
+	// 직렬화에서 제외하고 싶은 필드는 transient 키워드 사용
+	private transient String addr;
+
+
+
+-------------------------------------------------------------------------------------------------------------
+
+* serialVersionUID 필드
+직렬화한 클래스와 같은 클래스임을 알려주는 식별자 역할로
+컴파일 시 JVM이 자동으로 serialVersionUID 정적 필드를 추가해 별도로 작성하지 않아도
+오류는 나지 않지만 자동 생성 시 역직렬화에서 예상하지 못한 
+InvaildClassException을 유발할 수 있어 명시 권장
+private static final long serialVersionUID = 4489726448094257809L;
+
+-------------------------------------------------------------------------------------------------------------
+
+* 헷갈렸던 점
+Writer Outputstream은 아예 역할 자체가 다름
+Writer은 문자를 처리하기 위해서 만들어짐 바이트도 써야하고 문자도 쓰긴 써야함
+write라는 메소드가 둘다 있는데 
+OutputStream 은 write는 바이트 단위로 처리
+Writer에서는 write 문자형태로 처리
