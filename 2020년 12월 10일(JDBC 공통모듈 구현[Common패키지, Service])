@@ -1,0 +1,396 @@
+2020년 12월 10일
+
+// 회원 정보 수정
+public void updateMember() {
+//	// 뷰에서 사용자에게 수정할 아이디 입력 받기
+//	String id = mv.inputId("수정");
+//	// 모델(DAO)에 아이디 전달해서 정보 조회 후 조회된 데이터 Member 객체에 저장해서 반환
+//	Member mb = md.searchMemberId(id);
+//	// 뷰에 조회된 데이터를 전달하고, 수정할 데이터를 입력받아서 Member 객체에 저장해서 반환
+//	Member newMb = mv.updateMember(mb);
+//	// 모델(DAO)에 수정할 데이터를 전달해서 DB 수정 후 결과를 반환
+//	int result = md.updateMember(newMb);
+//	// 뷰에서 결과에 따라 출력 내용 결정
+//	mv.printResult(result, "정보 수정");
+
+	// 컨트롤러에서 조회된 데이터 유무 확인 후 기능 수행
+	// 수정할 아이디 입력 받아서 DB에서 조회
+	Member mb = md.searchMemberId(mv.inputId("수정"));
+	 if( mb == null ) {
+		 mv.printNotFoundMember();
+	 }else {
+		mv.printResult(md.updateMember(mb), "수정");
+	 }
+}
+
+조회된 아이디가 없을 경우 끝까지 수행할 필요가 없다.
+그래서 null일 경우에는
+// 회원 정보 없음 출력
+	public void printNotFoundMember() {
+	System.out.println("회원정보가 없습니다.");
+	}
+이 메소드를 호출하고 끝나게 한다.
+
+
+----------------------------------------------------------------------------------------------------
+
+JDBC 공통모듈 구현
+DBMS 연동, 객체반환, 트렌젝션 처리 등 중복 코드를 새로운 클래스에서 구동 될 수 있게 연동 구조 재설계
+
+Driver.properties
+프로그램이 가지는 기본 정보들을 properties 확장자 파일로 저장해 놓으면 유지보수에 용이 함
+다양한 설정들을 파일에 저장해놓고 파일을 불러와서 설정하도록.
+나중에 프로그램에서 그 파일에 있는 내용을 언제든지 불러서 쓸 수 있기 때문에 유지보수에 용이
+
+예시
+JDBC 연결을 위한 드라이버 정보들을 Driver.properties로 저장
+# Driver.properties
+driver = oracle.jdbc.driver.OracleDriver
+url = jdbc:oracle:thin:@localhost:1521:xe
+user = student
+pwd = student
+
+properties는 어떤 형태로 저장이 될까? 텍스트파일
+그래서 열어볼 수 있음
+따라서 계정과 패스워드까지 적어두면 보안에 굉장히 위험하다.
+
+----------------------------------------------------------------------------------------------------
+
+- Common (공통 모듈) 공통 모듈을 쓸거라면 Service 사용해야 함
+클래스 내부의 중복 코드를 처리하는 클래스가 담겨있는 패키지로 
+Connection 생성, Connection / Statement / PreparedStatement 반환 메소드, 트랜잭션 (commit, rollback)이 묶여 있음
+Service 패키지에서 사용
+
+트랜잭션 
+Statement와 PreparedStatement는 늘 사용하는게 아니라 골라서 쓰는거임
+-> 커먼에 꼭 넣어줘야하는건 아니다.
+
+- Servie (패키지 자체를 따로 뺄것임)
+Connection class 관리 및 객체 반환, 트랜젝션 관리하는 패키지
+
+- 싱글톤 패턴(Singleton Pattern)
+객체 사용 시 새로운 객체를 계속 생성해서 사용하는 것이 아니라
+하나의 객체만 생성하여 공유하는 것
+
+
+중복되는 코드들이 있으면 그것들을 한번에 처리할 클래스를 만들거고
+이런 클래스 여러개를 담아놓는 패키지라고 생각하면 됨
+
+
+----------------------------------------------------------------------------------------------------
+
+회원 탈퇴
+삭제 하기 전에
+1. 회원이 있는지 조회 -> SELECT
+2. 탈퇴 테이블에 정보 넣기(아이디, 이름정도) -> INSERT
+3. 삭제 -> DELETE
+
+2번 작업하다가 오류 -> 3번이 작업이 되면 안됨
+2번 작업은 성공 -> 3번 작업은 오류 -> 작업 완료가 되면 안됨
+따라서 autocommit을 꺼줘야 하고
+처리 결과에 따라 COMMIT을 할건지 ROLLBACK 할건지
+코드로 짜놓는 것이 좋다.
+
+
+Serive (DAO를 제어하는 놈)
+어떤 로직으로 어떻게 처리를 할건지
+connection도 service에서 관리함
+왜냐? conn.close()하면 자동 커밋되기 때문에
+
+탈퇴 메소드 하나 만들어 놓고
+dao에서 select 하도록 , insert하도록, select 하도록
+세개 다 성공하면 commit, 하나라도 실패하면 rollback하고 결과를 controller에게 넘겨준다.
+
+DAO (연동하는 실제 메소드들만 모아놓음)
+insert, update, delete, select 메소드 등을 구현
+DAO에서는 커밋, 롤백 해서는 안됨, Service에서 할거임
+
+
+Service는 절대 View와 직접 연결되어서는 안된다.
+이유 : 유지 /보수/ 관리 용이하게 하기 위함
+이걸 웹이나 app으로 동작하게 하면 각각의 기능이 크게 달라지는 것은 없다.
+하지만 만약 view와 service가 이어져있따면 view를 바꿀때마다 service도 건들여줘야 함.
+
+----------------------------------------------------------------------------------------------------
+
+Common -> DAO 안에서 중복되던 코드들 (Template)
+Service -> Controller 와 DAO 연결
+
+MVC 1번 M <-> C <-> V
+MVC 2번 M <-> S <-> C <-> V
+
+
+
+
+Common -> DAO 안에서 중복되던 코드들 (Template)
+Service -> Controller 와 DAO 연결
+
+MVC 1번 M <-> C <-> V
+MVC 2번 M <-> S <-> C <-> V
+
+새로 만들어 줄 것
+● Common패키지의 JDBCTemplate
+- JDBC를 사용하면서 공통적으로 사용되는 코드들을 모아서 만들어 놓은 Class
+- 드라이버 등록
+- DBMS 연결 (Connection)
+- DBMS 연결 닫기 (Connection close)
+- 트랜젝션 제어 코드 (Commit, Rollback)
+- Statement, PreparedStatement, ResultSet 닫기(close)
+// PreparedStatement는 Statement 클래스를 상속받기 때문에 다형성을 구현해서 Statement close를 같이 사용해도 됨
+
+
+- JDBCTemplate1 : 일반 라이브러리 클래스로 만들기, 템플릿 클래스 내 Connection 참조변수를 필드로 선언
+- JDBCTemplate2 : 일반 라이브러리 클래스로 만들기, 템플릿 클래스 내 Connection 참조변수를 getConnection() 메소드의 지역변수로 선언
+- JDBCTemplate3 : 객체를 생성하지 않고 각 메소드를 호출해서 사용(정적메소드로 구현 - static)
+
+
+● MemberService (Controller와 DAO를 연결하고 JDBCTemplate, DAO의 메소드를 호출해서 사용하는 등의 클래스)
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+// 방법 1 :일반 라이브러리 클래스로 만들기(JDBCTemplate 객체 생성 후 사용 - new JDBCTemplate1)
+	// JDBCTemplate1 : 템플릿 클래스 내 Connection 참조변수를 필드로 선언
+
+public class JDBCTemplate1 {
+// 필드부
+	Connection conn = null;
+// 메소드부
+	// DBMS 연결
+	public  Connection getConnection() {
+		
+		try {
+			// 드라이버 등록 - 생략가능(JDBC 하위버전 호환성을 위해 포함해 줌)
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			// DBMS 연결
+			conn = DriverManager.getConnection(
+					"jdbc:oracle:thin:@localhost:1521:XE", "STUDENT", "STUDENTPASS");
+		} catch (SQLException | ClassNotFoundException e) {
+			System.out.println("예기치 못한 오류 발생 : 데이터 베이스 연결 정보를 확인하세요.");
+			e.printStackTrace();
+		}
+		return conn;
+	}
+	
+	// DBMS 연결 닫기
+	public  void close() {
+		// 닫아주려하니까 연결의 정보 어디에있어? -> conn에 있음
+		try {
+			// 연결 정보가 있고, 닫혀있지 않은 경우에만 닫아주기
+			if(conn != null && !conn.isClosed()) {
+			conn.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+}
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+// 방법 2: 일반 라이브러리 클래스로 만들기 (JDBCTemplate 객체 생성 후 사용 - new JDBCTemplate2)
+	//JDBCTemplate2 : 템플릿 클래스 내 Connection 참조변수를 getConnection() 메소드의 지역변수로 선언
+
+public class JDBCTemplate2 {
+// 필드부
+// 메소드부
+	// DBMS 연결
+	public  Connection getConnection() {
+		Connection conn = null;
+		try {
+			// 드라이버 등록 - 생략가능(JDBC 하위버전 호환성을 위해 포함해 줌)
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			// DBMS 연결
+			conn = DriverManager.getConnection(
+					"jdbc:oracle:thin:@localhost:1521:XE", "STUDENT", "STUDENTPASS");
+		} catch (SQLException | ClassNotFoundException e) {
+			System.out.println("예기치 못한 오류 발생 : 데이터 베이스 연결 정보를 확인하세요.");
+			e.printStackTrace();
+		}
+		return conn;
+	}
+	
+
+	// DBMS 연결 닫기
+	public  void close(Connection conn) {
+		// 닫아주려하니까 연결의 정보 어디에있어? -> conn에 있음, 어떤 conn인지 알기 위해 인자값으로 conn 받아줌
+		try {
+			// 연결 정보가 있고, 닫혀있지 않은 경우에만 닫아주기
+			if(conn != null && !conn.isClosed()) {
+			conn.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+}
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+// 방법 3 : 객체를 생성하지 않고 각 메소드를 호출해서 사용(정적메소드로 구현 - static)
+public class JDBCTemplate3 {
+// 필드부
+// 메소드부
+	// DBMS 연결
+	public  static Connection getConnection() {
+		Connection conn = null;
+		try {
+			// 드라이버 등록 - 생략가능(JDBC 하위버전 호환성을 위해 포함해 줌)
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			// DBMS 연결
+			conn = DriverManager.getConnection(
+					"jdbc:oracle:thin:@127.0.0.1:1521:XE", "STUDENT", "STUDENTPASS");
+		} catch (SQLException | ClassNotFoundException e) {
+			System.out.println("예기치 못한 오류 발생 : 데이터 베이스 연결 정보를 확인하세요.");
+			e.printStackTrace();
+		}
+		return conn;
+	}
+	
+
+	// DBMS 연결 닫기
+	public static void close(Connection conn) {
+		// 닫아주려하니까 연결의 정보 어디에있어? -> conn에 있음, 어떤 conn인지 알기 위해 인자값으로 conn 받아줌
+		try {
+			// 연결 정보가 있고, 닫혀있지 않은 경우에만 닫아주기
+			if(conn != null && !conn.isClosed()) {
+			conn.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+}
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+public class MemberService {
+	// 회원 등록 
+	public int insertMember(Member mb) {
+//	// 방법 1,2 :JDBCTemplate 객체를 생성해서 사용
+//		// 방법 1 : JDBCTemplate1 : 템플릿 클래스 내 Connection 참조변수를 필드로 선언
+//		JDBCTemplate1 jt1 = new JDBCTemplate1(); // 공통 모듈 객체 생성
+//		Connection conn = jt1.getConnection();	// 공통 모듈에서 연결정보 받아와서 저장
+//		
+//		MemberDAO mdao = new MemberDAO();// 모델 (DAO) 객체 생성
+//		int result = mdao.insertMember(conn, mb); // 모델 (DAO)에 연결정보와 데이터 전달해서 기능 수행 한 뒤 결과값 받아오기
+//		// 필드에 연결 정보가 남아있기 때문에 close() 메소드에서 바로 사용 가능
+//		jt1.close();// 연결 정보 닫기
+
+//		// 방법 2 : JDBCTemplate2 : 템플릿 클래스 내 Connection 참조변수를 getConnection() 메소드의 지역변수로 선언
+//		JDBCTemplate2 jt2 = new JDBCTemplate2();
+//		Connection conn = jt2.getConnection();
+//		MemberDAO mdao = new MemberDAO();// 모델 (DAO) 객체 생성
+//		nt result = mdao.insertMember(conn, mb); // 모델 (DAO)에 연결정보와 데이터 전달해서 기능 수행 한 뒤 결과값 받아오기
+//		// 연결 정보가 지역변수라 close()메소드에서 사용할 수 없기 때문에 호출 시 연결 정보를 전달해 줘야 함
+//		jt2.close(conn);
+		
+		
+		// 방법 3 : 객체를 생성하지 않고 각 메소드를 호출해서 사용(정적메소드로 구현 - static)
+		Connection conn = JDBCTemplate3.getConnection();
+		MemberDAO mdao = new MemberDAO();
+		int result = mdao.insertMember(conn, mb);
+		JDBCTemplate3.close(conn);
+				
+				
+		// 최종 결과값 컨트롤러에 반환
+		return result;
+	
+	}
+}
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+// DB와 연동할 수 있는 클래스
+public class MemberDAO {
+
+
+	// 회원 등록
+	public int insertMember(Connection conn, Member mb) {
+						// DBMS 연결을 공통모듈로 사용해서 매개변수로 받아줌(서비스 모듈로 연결 제어)
+		// 코드 내 Connection 생성 부분과 연결닫는 부분을 모두 지워줌
+	
+		// DB에 저장 
+		String query = null;
+		Statement stmt = null;
+		int result = 0;
+		
+
+		try {
+			query = "INSERT INTO MEMBER VALUES('"+mb.getMemberId()+"','"+mb.getMemberPwd()+"','"+mb.getMemberName()+"','"+
+					mb.getGender()+"',"+mb.getAge()+",'"+mb.getEmail()+"','"+mb.getPhone()+"','"+mb.getAddress()+"','"
+					+mb.getHobby()+"','"+mb.getEnrollDate()+"')";
+			stmt = conn.createStatement();
+			result = stmt.executeUpdate(query);
+		} catch (SQLException e) {
+			System.out.println("오류발생 : 관리자에게 문의하세요~!");
+			e.printStackTrace();
+		} finally {
+			try { 
+				stmt.close(); 
+			} catch (SQLException e) {
+				System.out.println("오류발생 : 관리자에게 문의하세요~!");
+				e.printStackTrace();
+			}
+		}
+		return result;
+	}
+	
+}
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+MemberController 클래스
+
+// 필드부
+	// 뷰 객체를 저장할 참조변수 생성
+	private MemberView mv;
+	// 모델(DAO) 객체를 저장할 참조 변수 생성
+	private MemberDAO md;
+	// 서비스 객체를 저장할 참조 변수 생성
+	private MemberService ms;
+// 생성자부
+	public MemberController() {
+		// 뷰 객체 생성 후 참조변수에 저장
+		mv = new MemberView(); // 뷰 메소드 호출해서 값 받아와야 하니까
+		// 모델(DAO) 객체 생성 후 참조 변수에 저장
+		md = new MemberDAO(); // DAO 메소드 호출해서 값 받아줘야 하니까
+		// 서비스 객체 생성 후 참조변수에 저장
+		ms = new MemberService();
+	}
+
+// 메소드부
+	// 회원관리 프로그램 시작
+	public void start() {
+	(생략)
+	}
+	
+
+	// 회원 등록
+	public void insertMember() {
+//		// 뷰에서 화면에 메뉴출력 후 사용자에 입력받기(입력받은 정보를 Member 객체에 담아서 반환)
+//		Member mb = mv.insertMember();
+//		// 모델(DAO)에 사용자 입력값이 저장된 Member 객체를 전달해서 DB에 삽입 후 결과를 받아옴
+//		int result = md.insertMember(mb);
+//		// 뷰에서 결과에 따라 출력 내용 결정
+//		mv.printResult(result, "등록");
+		
+//		// 위 코드를 한줄로 작성
+//		// 뷰에서 입력받은 정보를 Member 객체로 받아와서 DAO에 전달해서 DB등록 후 결과값 받아와서 뷰에서 출력
+//		mv.printResult(md.insertMember(mv.insertMember()),"등록");
+		
+		// 서비스 사용
+		// 뷰에서 화면에 메뉴출력 후 사용자에 입력받기
+		Member mb = mv.insertMember();
+		// 서비스에 사용자 입력값이 저장된 Member객체를 전달해서 DB에 삽입 후 결과를 받아옴
+		int result = ms.insertMember(mb);
+		// 뷰에서 결과에 따라 출력 내용 결정
+		mv.printResult(result, "등록");
+		
+	}
+
