@@ -1,0 +1,321 @@
+2020년 12월 11일
+
+JTBCTemplate 3번처럼 메소드들을 Static 형식으로 만들 때
+Connection의 참조변수를 필드에 선언하기보다는 지역변수로 만드는 것이 좋다.
+이유 : 필드에 참조변수를 선언하면 모두가 그 참조변수를 공유한다.
+참조변수에는 마지막에 연결한 정보의 주소밖에 담지 못하게 된다.
+
+-------------------------------------------------------------------------------------------------------------
+
+DAO에서 Statement를 닫는 메소드 쓰려면  또 JDBCTemplate 객체 생성해야 함
+하지만 JDBCTemplate에서 Statement, PreparedStatement 닫는 메소드를 static으로 만들어주면
+객체 생성하지 않아도 호출해서 메소드를 사용할 수 있다. 
+
+JDBCTemplate3에
+트랜젝션 제어(commit & rollback), 
+Statement, 
+PreparedStatement, 
+ResultSet 닫는 메소드를 static형식으로 작성해준다.
+
+// 트랜젝션 제어(commit)
+	public static void commit(Connection conn) {	// 어떤 연결을 commit 해줄건지
+		try {
+			if(conn != null && !conn.isClosed()) {
+			conn.commit();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+// 트랜젝션 제어(rollback)
+	public static void rollback(Connection conn) {	// 어떤 연결을 rollback 해줄건지
+		try {
+			if(conn != null && !conn.isClosed()) {
+			conn.rollback();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+// Statement, PreparedStatement 닫기
+	public static void close(Statement stmt) {
+		try {
+			if(stmt != null && !stmt.isClosed()) {
+			stmt.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+// ResultSet 닫기
+	public static void close(ResultSet rset) {
+		try {
+			if(rset != null && !rset.isClosed()) {
+			rset.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+
+이에 따라서 MemberDAO 클래스의 메소드들도 수정해준다.
+원래 작성해놨던 Statement, PreparedStatement, ResultSet 닫는 코드들을 지워주고
+JDBCTemplate3의 메소드들을 호출한다.
+
+
+MemberDAO 클래스
+
+// 회원정보 삭제
+	public int deleteMember(Connection conn, String id) {
+	
+		String query = null;
+		PreparedStatement pstmt = null;
+		int result = 0;
+		
+		if(id == null) {
+			return result;
+		}
+		try {
+		
+		query = "DELETE FROM MEMBER WHERE MEMBER_ID = ?";
+		pstmt = conn.prepareStatement(query);
+		pstmt.setString(1, id);
+		result = pstmt.executeUpdate();
+		} catch (SQLException e) {
+			System.out.println("오류발생 : 관리자에게 문의하세요");
+		} finally{
+			JDBCTemplate3.close(pstmt); 	//pstmt 닫는 메소드 호출, 
+		// conn은 어디서 닫는다? -> conn을 관리하는 Service에서 닫는다
+	}	
+		return result;
+	}
+
+
+이하 Statement, PreparedStatement, ResultSet을 쓰는 메소드들도 코드 지워주고 JDBCTemplate3의 닫는 메소드들로 다 바꿔준다.
+PreparedStatement는 Statement를 상속하고 있기 때문에 Statement 닫는 메소드 같이 쓰면 된다.
+
+
+
+MemberSerive 클래스
+
+// 회원 삭제
+	public int deleteMember(String id) {
+		Connection conn = JDBCTemplate3.getConnection();
+		int result = new MemberDAO().deleteMember(conn,id);
+		JDBCTemplate3.close(conn);
+		return result;
+	}
+
+
+MemberController 클래스
+
+// 회원 정보 삭제
+	public void deleteMember() {
+	// 컨트롤러에서 조회된 데이터 유무 확인 후 기능 수행
+		String id = mv.deleteMember(ms.searchMemberId(mv.inputId("삭제")));
+		if(id == null) {
+				mv.printNotFoundMember();
+		}else {
+			mv.printResult(ms.deleteMember(id), "삭제");
+		}
+	}
+
+
+-------------------------------------------------------------------------------------------------------------
+
+템플릿을 이용해서 DB연결 했을 때을 무조건 오토커밋 안하게 쓸거면 
+템플릿 안에 conn.setAutoCommit(false)적어줌 -> 무조건 오토커밋안함
+
+템플릿을 이용해서 DB연결 했을 때 오토커밋 쓸놈도 있을 거 같고 안쓸놈도 있을 거같아
+-> Service에 conn.setAutoCommit(false) 적어줌
+-> autocommit 꺼준 메소드들만 꺼서 사용
+
+Autocommit 안꺼주면 한줄 실행 할 때 마다 알아서 자동 커밋됨 (한줄 끝날때마다 바로 적용됨)
+
+1. 템플릿 안에 conn.setAutoCommit(false) 적어서 오토커밋 꺼주기
+JDBCTemplate3 클래스
+	public  static Connection getConnection() {
+		Connection conn = null;
+		
+		try {
+			// 드라이버 등록 - 생략가능(JDBC 하위버전 호환성을 위해 포함해 줌)
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			// DBMS 연결
+			conn = DriverManager.getConnection(
+					"jdbc:oracle:thin:@127.0.0.1:1521:XE", "STUDENT", "STUDENTPASS");
+			// 템플릿을 이용해서 DB연결 시 Autocommit 안하도록 설정
+			conn.setAutoCommit(false);
+		} catch (SQLException | ClassNotFoundException e) {
+			System.out.println("예기치 못한 오류 발생 : 데이터 베이스 연결 정보를 확인하세요.");
+			e.printStackTrace();
+		}
+		return conn;
+	}
+
+
+serviec 클래스
+	public int insertMember(Member mb) {
+		Connection conn = JDBCTemplate3.getConnection();
+		MemberDAO mdao = new MemberDAO();
+		//int result = mdao.insertMember(conn, mb);
+		// 위 두 코드 줄여서 사용 (객체를 한번만 사용할 경우)
+		int result = new MemberDAO().insertMember(conn,mb);
+		// 트랜젝션 사용 시 작업이 모두 완료  된 후 조건에 따라 한번에 모두 적용할지 원복할지 결정
+		if(result > 0) {
+			JDBCTemplate3.commit(conn);
+		}else {
+			JDBCTemplate3.rollback(conn);
+		}
+		JDBCTemplate3.close(conn);
+		// 최종 결과값 컨트롤러에 전달
+		return result;
+
+
+2. Service에 conn.setAutoCommit(false) 적어주기
+JDBCTemplate3 클래스 (오토커밋 켜진 상태)
+	public  static Connection getConnection() {
+		Connection conn = null;
+		
+		try {
+			// 드라이버 등록 - 생략가능(JDBC 하위버전 호환성을 위해 포함해 줌)
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			// DBMS 연결
+			conn = DriverManager.getConnection(
+					"jdbc:oracle:thin:@127.0.0.1:1521:XE", "STUDENT", "STUDENTPASS");
+			// 템플릿을 이용해서 DB연결 시 Autocommit 안하도록 설정
+		} catch (SQLException | ClassNotFoundException e) {
+			System.out.println("예기치 못한 오류 발생 : 데이터 베이스 연결 정보를 확인하세요.");
+			e.printStackTrace();
+		}
+		return conn;
+	}
+
+
+Service 클래스
+	public int insertMember(Member mb) {
+		Connection conn = JDBCTemplate3.getConnection();
+		MemberDAO mdao = new MemberDAO();
+		conn.setAutoCommit(false); // DB에 보내기 전에 꺼내야 한다.
+		//int result = mdao.insertMember(conn, mb);
+		// 위 두 코드 줄여서 사용 (객체를 한번만 사용할 경우)
+		int result = new MemberDAO().insertMember(conn,mb);
+		// 트랜젝션 사용 시 작업이 모두 완료  된 후 조건에 따라 한번에 모두 적용할지 원복할지 결정
+		if(result > 0) {
+			JDBCTemplate3.commit(conn);
+		}else {
+			JDBCTemplate3.rollback(conn);
+		}
+		JDBCTemplate3.close(conn);
+		// 최종 결과값 컨트롤러에 전달
+		return result;
+
+
+-------------------------------------------------------------------------------------------------------------
+
+SingleTon 방식
+ - 클래스에 대한 객체가 프로그램을 구동하는 내내 1개만 만들어져서 사용하는 디자인 패턴
+ - 동일한 형태의 객체는 new를 통해서 너무 많이 생성하게 되면 오버헤드(부하)가 발생할 수 있음
+ - 1개만 선언해도 문제가 없을 경우 사용하는 방식
+ 
+   [SingleTon 적용]
+  1. SingleTon을 적용하고자 하는 클래스의 필드부에 자기 자신을 참조하는 참조변수 생성
+  2. 생성자를 private으로 만들어서 new를 통한 객체 생성이 불가능하게 만들어 줌 (외부에서는 생성자를 사용하지 못하기 때문에 객체를 생성할 수 없음)
+  3. 클래스 내 자기 자신의 객체를 생성하는 메소드를 만들어서 생성된 객체의 주소를 반환해줌
+   	- 자기참조변수의 값이 null인 경우에만 객체 생성
+ 
+
+이제 싱글톤 클래스에 있는 메소드들을 굳이 static으로 만들어줄 필요없다. 
+(getConnection이랑 close는 객체안만들고 언제 어디서는 사용할 수 있게 하기 위해 이거 두개만 static으로 만들어주자)
+왜? 이제 JDBCTemplate4 객체 하나 만든걸로 접근할 수 있기 때문에
+
+싱글톤은 쓸 때든 안 쓸때든 static으로 가지고 있는 것들이 있다.
+controller 같은 애들은 run으로 controller 호출
+다른애들은 controller호출 안함
+어차피 객체 안만들어지는데 굳이 싱글톤으로 만들 필요가 있을까?
+
+사용할때마다 무조건 새롭게 객체를 만들어야하는것들이 있고
+하나 만들어서 같이 써도 되는 애들이 있다.
+하나 만들어서 같이 써도 되는 애들은 싱글톤으로 만들어주면 된다.
+ex )공통 모듈로 사용할때 부하가 많이 걸리는애들
+커넥션같은애들 계속 연결하고 받아오고 이러는것들
+
+
+// SingleTon 적용 클래스 
+public class JDBCTemplate4 {
+// 필드부
+	// 1. SingleTon을 적용하고자 하는 클래스의 필드부에 자기 자신을 참조하는 참조변수 생성
+	private static JDBCTemplate4 instance = null; // JDBCTemplate4형, 참조변수 이름: instance
+// 생성자부 
+	// 2. 생성자를 private으로 만들어서 new를 통한 객체 생성이 불가능하게 만들어 줌 (외부에서는 생성자를 사용하지 못하기 때문에 객체를 생성할 수 없음)
+	private JDBCTemplate4() {}
+// 메소드부
+	// 3. 클래스 내 자기 자신의 객체를 생성하는 메소드를 만들어서 생성된 객체의 주소를 반환해줌
+		// 외부에서 객체 생성을 위해 접근해야 하기 때문에 static 메소드로 만들어줌
+	public static JDBCTemplate4 getInstance() {
+		if(instance == null) { // 객체가 만들어져 있지 않을 때만 객체 생성
+		instance = new JDBCTemplate4();
+		}
+		return instance;
+	}
+
+	// 객체 생성 후 사용할 메소드들은 static 메소드로 만들 필요 없음
+}
+	
+
+Service 클래스
+public class MemberService {
+// 회원 등록 
+	public int insertMember(Member mb) {
+// SingleTon 사용
+			// Template3은 모든 메서드 static으로 구현해야 함
+			// 사용할 때마다 클래스명 전체를 불러서 사용해야 함
+			// Template3으로 실제 객체 생성 가능함
+				//JDBCTemplate3 jt3 = new JDBCTemplate3();
+	
+		// 싱글톤 구현시 객체 생성 불가능
+		// JDBCTemplate4 jt4 = new JDBCTemplate4();	// 오류
+		// 외부에서는 객체 생성 메소드를 이용해서 객체의 주소를 받아서 사용 가능
+		// 클래스 내부에서 객체가 하나만 생성됨
+	
+		JDBCTemplate4 jt4 = JDBCTemplate4.getInstance(); // 반환값이 JDBCTemplate4형의 변수임
+		Connection conn = jt4.getConnection();
+		int result = new MemberDAO().insertMember(conn, mb);
+		if(result > 0) {
+			jt4.commit(conn);
+		}else {
+			jt4.rollback(conn);
+		}
+		jt4.close(conn);
+		
+		// 최종 결과값 컨트롤러에 전달
+		return result;
+	}
+
+-------------------------------------------------------------------------------------------------------
+
+JDBC Connection Pool
+
+미리 데이터베이스 Connection을 여러 개 만들어서 특정 공간에 저장해 놓고,
+여러 사용자가 필요할 때마다 하나씩 꺼내서 사용하고 다시 집어넣는 방식
+
+connection : db에 연결, 연결해서 정보를 가져오는데 많은 부하가 걸림
+그냥 이 커넥션 하나를 계속 생성하고 삭제하고 하지말고 connection 을 싱글톤 자체로 만들어버린다.
+싱글톤을 여러개 만들어놓아서 사용자들이 필요할 때 가져가서 쓰고 다쓰면 다시 가져다 놓는 형식
+
+
+Pooling 순서
+1. Connection을 미리 생성해서 보관
+2. Connection에 대한 요청이 들어오면, 보관 중인 Connection 중 하나를 넘겨줌
+3. 사용이 끝난 Connection을 다시 보관
+
+Connection Pooling의 장점
+1. 속도 향상
+2. 자원의 효율적인 활용
+3. Connection 객체 수 제어 가능
